@@ -51,7 +51,7 @@ namespace EVERouteFinder
             List<Node> myList = getSolarSystems();
             ParallelOptions po = new ParallelOptions();
             po.MaxDegreeOfParallelism = Environment.ProcessorCount;
-            //workload is around 55% program 35% database. probably could be highly optimized by saving all queried nodes to a single structure and changing them from there.
+            //workload is around 55% program 35% database. probably could be highly optimized by saving all queried nodes to a single structure and working from there
             Parallel.ForEach(myList, po, n =>
             {
                 List<Node> mylist2 = getSolarSystems();
