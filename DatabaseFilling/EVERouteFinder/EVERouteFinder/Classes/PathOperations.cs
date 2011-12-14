@@ -13,7 +13,7 @@ namespace EVERouteFinder.Classes
         {
             this.start = start;
             this.goal = goal;
-            avoidanceList = new List<Node>();
+            this.avoidanceList= new List<Node>();
             this.closedset = new List<Node>();
             this.openset = new List<Node>();
         }
@@ -22,9 +22,18 @@ namespace EVERouteFinder.Classes
         {
             this.start = start;
             this.goal = goal;
-            avoidanceList = avoidancelist;
+            this.avoidanceList = avoidancelist;
             this.closedset = new List<Node>();
             this.openset = new List<Node>();
+        }
+
+        public PathOperations(Node start, Node goal, bool safeRoute)
+        {
+            //this.start = start;
+            //this.goal = goal;
+            //this.avoidanceList = avoidancelist;
+            //this.closedset = new List<Node>();
+            //this.openset = new List<Node>();
         }
 
         public Node start { get; set; }
@@ -63,38 +72,41 @@ namespace EVERouteFinder.Classes
                     //    loop(n, n1);
                     //}
                     //);
-                    foreach(Node y in x.getNeighborNodes())
+                    foreach (Node y in x.getNeighborNodes())
                     {
-                        y.goal = this.goal;
-                        y.nofactor = this.nofactor;
-                        double tentative_g_score = x.g_score + 1; //el 1 se sustituiria por dist(x,y) aplicable segun el caso
-                        bool tentative_is_better = false;
+                        if (this.searchbyID(avoidanceList, y.ID) == null)
+                        {
+                            y.goal = this.goal;
+                            y.nofactor = this.nofactor;
+                            double tentative_g_score = x.g_score + 1; //el 1 se sustituiria por dist(x,y) aplicable segun el caso
+                            bool tentative_is_better = false;
 
-                        if (this.searchbyID(this.closedset, y.ID) != null)
-                        {
-                            y.g_score = this.searchbyID(this.closedset, y.ID).g_score;
-                        }
-                        else
-                        {
-                            if (this.searchbyID(this.openset, y.ID) == null)
+                            if (this.searchbyID(this.closedset, y.ID) != null)
                             {
-                                this.openset.Add(y);
-                                //nodeOset(this, new nodeInOpenSetEventArgs(y, true));
+                                y.g_score = this.searchbyID(this.closedset, y.ID).g_score;
+                            }
+                            else
+                            {
+                                if (this.searchbyID(this.openset, y.ID) == null)
+                                {
+                                    this.openset.Add(y);
+                                    //nodeOset(this, new nodeInOpenSetEventArgs(y, true));
+                                    tentative_is_better = true;
+                                }
+                            }
+                            if (tentative_g_score < y.g_score)
+                            {
                                 tentative_is_better = true;
                             }
-                        }
-                        if (tentative_g_score < y.g_score)
-                        {
-                            tentative_is_better = true;
-                        }
-                        else
-                        {
-                            tentative_is_better = false;
-                        }
-                        if (tentative_is_better)
-                        {
-                            y.camefrom = x;
-                            y.g_score = tentative_g_score;
+                            else
+                            {
+                                tentative_is_better = false;
+                            }
+                            if (tentative_is_better)
+                            {
+                                y.camefrom = x;
+                                y.g_score = tentative_g_score;
+                            }
                         }
                     }
                 }

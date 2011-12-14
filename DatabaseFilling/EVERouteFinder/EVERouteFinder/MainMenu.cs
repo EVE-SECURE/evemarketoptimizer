@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using EVERouteFinder.Classes;
 using System.IO;
+using System.Globalization;
 
 namespace EVERouteFinder
 {
@@ -171,7 +172,8 @@ namespace EVERouteFinder
 
         private void loopMarketDatabase()
         {
-            IEnumerable<string> stringList = File.ReadLines(@"C:\Users\Greitone\Downloads\2011-09-05.dump\2011-09-05.dump");
+            //IEnumerable<string> stringList = File.ReadLines(@"C:\Users\Greitone\Downloads\2011-09-05.dump\2011-09-05.dump");
+            IEnumerable<string> stringList = File.ReadLines(@"C:\Users\Greitone\Desktop\output2.txt");
             ParallelOptions po = new ParallelOptions();
             po.MaxDegreeOfParallelism = Environment.ProcessorCount;
             Parallel.ForEach(stringList, po, n =>
@@ -181,11 +183,14 @@ namespace EVERouteFinder
                 //n.Replace('	'.ToString(), ",");
                 
                 string[] s = n.Split(new string[] {"\",\"", "\t"}, StringSplitOptions.RemoveEmptyEntries);
-                for(int i=0; i < s.Count(); i++)
+                if (s[0].Contains('\"'))
                 {
-                    s[i] = s[i].Replace("\",\"", string.Empty);
-                    s[i] = s[i].Replace('\"', ' ');
-                    //s2.Replace("\"", string.Empty);
+                    for (int i = 0; i < s.Count(); i++)
+                    {
+                        s[i] = s[i].Replace("\",\"", string.Empty);
+                        s[i] = s[i].Replace('\"', ' ');
+                        //s2.Replace("\"", string.Empty);
+                    }
                 }
                 EVEOrder o = new EVEOrder(s);
                 o.InsertToDB();
@@ -208,6 +213,11 @@ namespace EVERouteFinder
 
             //}
 
+        }
+
+        private void MainMenu_Load(object sender, EventArgs e)
+        {
+            Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
         }
 
 
