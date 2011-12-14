@@ -86,18 +86,15 @@ namespace EVERouteFinder.Classes
             double.TryParse("1063700000000000", out minDist);
             maxDist = minDist * 324.09;
             double distance = double.MaxValue;
-            //EVEDBoperations nodeOperations = new EVEDBoperations();
-            //nodeOperations.startEVEDBConnection();
-            //nodeOperations.openEVEDBConnection();
-            //nodeOperations.setEVEDBQuery(nodeOperations.premadeQuery_getDistanceBetweenSolarSystems(node.ID, goal.ID));
-            //while (nodeOperations.eveDBQueryRead())
-            //{
-            //    distance = (double)nodeOperations.eveDBReader[0];
-            //}
-            //nodeOperations.eveDBQueryClose();
-            //nodeOperations.closeEVEDBConnection();
             distance = Math.Sqrt(Math.Pow(node.X - goal.X, 2) + Math.Pow(node.Y - goal.Y, 2) + Math.Pow(node.Z - goal.Z, 2));
-            return Settings.SEVEDBSettings.factor * distance / maxDist;
+            return Settings.SEVEDBSettings.factor * distance / maxDist; 
+            //last stable factor found at 3,89000000000012 (more than 95% accuracy) 
+            //but factors of up to 15-17 are quite accurate (maybe around 85-90% accuracy
+            //and only miss by 1-2 jumps) but quite faster. If calculation times for the whole
+            //algorythm are a problem accuracy can be lowered for the sake of execution times (since
+            //the only 100% accurate is factor=0) route finding times for long routes (60+ nodes) are halved with factor=17 
+            //from factor=0 usually long routes get higher accuracy from high factors while shorter routes
+            //benefit from lower or 0 factor (and their execution time is pretty low anyway
         }
 
         private double hFunctionNoFactor(Node node, Node goal)
