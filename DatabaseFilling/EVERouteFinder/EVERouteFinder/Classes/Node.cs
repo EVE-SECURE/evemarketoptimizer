@@ -66,7 +66,7 @@ namespace EVERouteFinder.Classes
 
         public List<Node> getNeighborNodes()
         {
-            if (neighborNodes != null)
+            if (this.neighborNodes != null)
             {
                 EVEDBoperations nodeOperations = new EVEDBoperations();
                 nodeOperations.startEVEDBConnection();
@@ -75,12 +75,12 @@ namespace EVERouteFinder.Classes
                 this.neighborNodes= new List<Node>();
                 while (nodeOperations.eveDBQueryRead())
                 {
-                    neighborNodes.Add(new Node((int)nodeOperations.eveDBReader[0]));
+                    this.neighborNodes.Add(new Node((int)nodeOperations.eveDBReader[0]));
                 }
                 nodeOperations.eveDBQueryClose();
                 nodeOperations.closeEVEDBConnection();
             }
-            return neighborNodes;
+            return this.neighborNodes;
         }
 
         private double hFunction(Node node, Node goal)
