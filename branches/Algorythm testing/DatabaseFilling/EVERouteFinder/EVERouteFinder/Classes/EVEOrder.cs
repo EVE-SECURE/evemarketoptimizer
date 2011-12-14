@@ -47,7 +47,7 @@ namespace EVERouteFinder.Classes
                     int.TryParse(order[3], out this.stationID) &&
                     int.TryParse(order[4], out this.typeID) &&
                     int.TryParse(order[5], out this.bid) &&
-                    double.TryParse(order[6], out this.price) &&
+                    double.TryParse(order[6], System.Globalization.NumberStyles.AllowDecimalPoint, new System.Globalization.CultureInfo("en-US"), out this.price) &&
                     int.TryParse(order[7], out this.minVolume) &&
                     int.TryParse(order[8], out this.volRemain) &&
                     int.TryParse(order[9], out this.volEnter) &&
@@ -70,17 +70,18 @@ namespace EVERouteFinder.Classes
                     int.TryParse(order[2], out this.stationID) &&
                     int.TryParse(order[3], out this.typeID) &&
                     int.TryParse(order[4], out this.bid) &&
-                    double.TryParse(order[5], out this.price) &&
+                    double.TryParse(order[5], System.Globalization.NumberStyles.AllowDecimalPoint, new System.Globalization.CultureInfo("en-US"), out this.price) &&
                     int.TryParse(order[7], out this.minVolume) &&
                     int.TryParse(order[8], out this.volRemain) &&
                     int.TryParse(order[9], out this.volEnter) &&
                     DateTime.TryParse(order[10], out this.issued) &&
                     DateTime.TryParse(order[14], out this.reported))
                 {
-                    string s = order[11].Replace(" days, ", ":");
+                    string s = order[11].Replace(" days", ":00:00:00");
+                    
                     if (s == order[11])
                     {
-                        s = order[11].Replace(" day, ", ":");
+                        s = order[11].Replace(" day", ":00:00:00");
                     }
                     success = TimeSpan.TryParse(s, out this.duration);
                 }

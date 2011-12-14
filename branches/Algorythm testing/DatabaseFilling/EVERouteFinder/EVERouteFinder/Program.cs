@@ -15,6 +15,7 @@ namespace EVERouteFinder
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+            Application.CurrentCulture = new System.Globalization.CultureInfo("en-US");
             Application.Run(new MainMenu());
         }
     }
