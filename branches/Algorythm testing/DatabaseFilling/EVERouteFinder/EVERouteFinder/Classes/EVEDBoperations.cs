@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Data.SqlClient;
-using EVERouteFinder.Settings;
 using System.Threading;
 
 namespace EVERouteFinder.Classes
@@ -166,7 +165,7 @@ namespace EVERouteFinder.Classes
 
         public string premadeQuery_insertToEveMarketData(EVEOrder order)
         {
-            string s = "insert into dbo.EVEMarketData values(" + order.OrderID.ToString() + ", " + order.RegionID.ToString() + ", " + order.SystemID.ToString() + ", " + order.StationID.ToString() + ", " + order.TypeID.ToString() + ", " + order.Bid.ToString() + ", " + order.Price.ToString() + ", " + order.MinVolume.ToString() + ", " + order.VolRemain.ToString() + ", " + order.VolEnter.ToString() + ", " + "'" + order.Issued.ToString("yyyy/MM/dd hh:mm:ss") + "'" + ", " + order.Duration.TotalDays.ToString().Replace(',', '.') + ", " + "'" + order.Reported.ToString("yyyy/MM/dd hh:mm:ss") + "'" + ");";
+            string s = "insert into dbo.EVEMarketData values(" + order.OrderID.ToString() + ", " + order.RegionID.ToString() + ", " + order.SystemID.ToString() + ", " + order.StationID.ToString() + ", " + order.TypeID.ToString() + ", " + order.Bid.ToString() + ", " + order.Price.ToString(new System.Globalization.CultureInfo("en-US")) + ", " + order.MinVolume.ToString() + ", " + order.VolRemain.ToString() + ", " + order.VolEnter.ToString() + ", " + "'" + order.Issued.ToString("yyyy/MM/dd hh:mm:ss") + "'" + ", " + order.Duration.TotalDays.ToString().Replace(',', '.') + ", " + "'" + order.Reported.ToString("yyyy/MM/dd hh:mm:ss") + "'" + ");";
             return s;
         }
 

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 
 namespace EVERouteFinder.Classes
 {
@@ -61,21 +62,25 @@ namespace EVERouteFinder.Classes
         public Node goal { get; set; }
         public bool notnull = false;
         public bool nofactor = false;
+        private List<Node> neighborNodes;
 
         public List<Node> getNeighborNodes()
         {
-            EVEDBoperations nodeOperations = new EVEDBoperations();
-            nodeOperations.startEVEDBConnection();
-            nodeOperations.openEVEDBConnection();
-            nodeOperations.setEVEDBQuery(nodeOperations.premadeQuery_getAdjacentSolarSystems(this.ID));
-            List<Node> neighbornodes = new List<Node>();
-            while(nodeOperations.eveDBQueryRead())
+            if (neighborNodes != null)
             {
-                neighbornodes.Add(new Node((int)nodeOperations.eveDBReader[0]));
+                EVEDBoperations nodeOperations = new EVEDBoperations();
+                nodeOperations.startEVEDBConnection();
+                nodeOperations.openEVEDBConnection();
+                nodeOperations.setEVEDBQuery(nodeOperations.premadeQuery_getAdjacentSolarSystems(this.ID));
+                this.neighborNodes= new List<Node>();
+                while (nodeOperations.eveDBQueryRead())
+                {
+                    neighborNodes.Add(new Node((int)nodeOperations.eveDBReader[0]));
+                }
+                nodeOperations.eveDBQueryClose();
+                nodeOperations.closeEVEDBConnection();
             }
-            nodeOperations.eveDBQueryClose();
-            nodeOperations.closeEVEDBConnection();
-            return neighbornodes;
+            return neighborNodes;
         }
 
         private double hFunction(Node node, Node goal)
@@ -134,4 +139,5 @@ namespace EVERouteFinder.Classes
         }
 
     }
+
 }

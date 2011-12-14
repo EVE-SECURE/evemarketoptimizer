@@ -50,6 +50,6 @@ namespace EVERouteFinder.Settings
     //        XmlOperations xmlSettingsSerializer = new XmlOperations();
     //        xmlSettingsSerializer.Save(this, SettingsPath, "EVERouteFinder.Settings.EVEDBSettings");
     //    }
-        
+
     //}
 }
