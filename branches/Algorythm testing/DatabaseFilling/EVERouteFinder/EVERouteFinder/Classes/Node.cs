@@ -119,7 +119,7 @@ namespace EVERouteFinder.Classes
                 this.if_score = g_score + h_scoreF();
             }
             return this.if_score;
-        } 
+        }
 
 
         private double h_scoreF()
