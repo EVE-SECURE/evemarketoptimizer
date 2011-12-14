@@ -20,36 +20,6 @@ namespace EVERouteFinder
             InitializeComponent();
         }
 
-        string openset = string.Empty;
-        string closedset = string.Empty;
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-        }
-
-        //        PathOperations pop = new PathOperations(new Node(30004659), new Node(30000647));
-        //        List<Node> route = new List<Node>();
-
-        //        route = pop.Evaluate();
-        //        string systems = "";
-        //        int i = 0;
-        //        foreach (Node n in route)
-        //        {
-        //            systems += n.Name + ",";
-        //            Console.WriteLine(n.Name);
-        //            i++;
-        //        }
-        //        Console.WriteLine(i);
-        private void openListEvent(object sender, nodeInOpenSetEventArgs e)
-        {
-            this.openset += "Openlist: " + e.eventTime.Second + "." + e.eventTime.Millisecond + " " + e.isAdded.ToString() + " " + e.opensetNode.Name + "; ";
-            //this.Refresh();
-        }
-        private void closedListEvent(object sender, nodeInClosedSetEventArgs e)
-        {
-            this.closedset += "ClosedList: " + e.eventTime.ToLongTimeString() + e.isAdded.ToString() + e.closedsetNode.Name + "\r\n";
-            //this.Refresh();
-        }
 
         private List<Node> getSolarSystems()
         {
