@@ -73,6 +73,7 @@
   <ItemGroup>
     <Compile Include="Classes\EVEDBoperations.cs" />
     <Compile Include="Classes\EVEOrder.cs" />
+    <Compile Include="Classes\MarketOperations.cs" />
     <Compile Include="Classes\Node.cs" />
     <Compile Include="Classes\PathOperations.cs" />
     <Compile Include="MainMenu.cs">
