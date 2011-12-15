@@ -114,7 +114,7 @@ namespace EVERouteFinder.Classes
             return null;
         }
 
-        public Node searchbyID(List<Node> nodeList, int id)
+        private Node searchbyID(List<Node> nodeList, int id)
         {
             return nodeList.Find
             (
