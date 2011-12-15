@@ -173,9 +173,9 @@ namespace EVERouteFinder
         private void loopMarketDatabase()
         {
             //IEnumerable<string> stringList = File.ReadLines(@"C:\Users\Greitone\Downloads\2011-09-05.dump\2011-09-05.dump");
-            IEnumerable<string> stringList = File.ReadLines(@"C:\Users\Greitone\Desktop\output2.txt");
+            IEnumerable<string> stringList = File.ReadLines(@"C:\Users\Greitone\Desktop\output.txt");
             ParallelOptions po = new ParallelOptions();
-            po.MaxDegreeOfParallelism = Environment.ProcessorCount;
+            po.MaxDegreeOfParallelism =  Environment.ProcessorCount;
             Parallel.ForEach(stringList, po, n =>
             {
                 //n.Replace("\",\"", ",");
