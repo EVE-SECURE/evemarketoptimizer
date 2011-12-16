@@ -27,7 +27,7 @@ namespace EVERouteFinder.Classes
         public int SystemID { get { return this.systemID;} set { this.systemID = value;} }
         public int StationID { get { return this.stationID;} set { this.stationID = value;} }
         public int TypeID { get { return this.typeID; } set { this.typeID = value; } }
-        public int Bid { get { return this.bid; } set { this.bid = value; } }
+        public int Bid { get { return this.bid; } set { this.bid = value; } } //bid = 0 means it's a sell order, bid=1 means it's a buying order
         public double Price { get { return this.price; } set { this.price = value; } }
         public int MinVolume { get { return this.minVolume; } set { this.minVolume = value; } }
         public int VolRemain { get { return this.volRemain; } set { this.volRemain = value; } }
