@@ -161,22 +161,34 @@ namespace EVERouteFinder
                 IEnumerable<string> stringList = File.ReadLines(fi.FullName);
                 ParallelOptions po = new ParallelOptions();
                 po.MaxDegreeOfParallelism = Environment.ProcessorCount;
+                string mys = stringList.ElementAt(0);
+                bool isEveLog = false;
+                if (mys.StartsWith("price,volRemaining,typeID,range,orderID,volEntered,minVolume,bid,issueDate,duration,stationID,regionID,solarSystemID,jumps,"))
+                {
+                    isEveLog = true;
+                }
                 Parallel.ForEach(stringList, po, n =>
                 {
-                    string[] s = n.Split(new string[] { "\",\"", "\t" }, StringSplitOptions.RemoveEmptyEntries);
-                    if (s[0].Contains('\"'))
-                    {
-                        for (int i = 0; i < s.Count(); i++)
-                        {
-                            s[i] = s[i].Replace("\",\"", string.Empty);
-                            s[i] = s[i].Replace('\"', ' ');
-                        }
-                    }
+                    string[] s = formatOrderString(n, isEveLog);
                     EVEOrder o = new EVEOrder(s);
                     o.InsertToDB();
                 }
-                );
+            );
             }
+        }
+
+        private string[] formatOrderString(string n, bool isEveLog)
+        {
+            string[] s = n.Split(new string[] { "\",\"", "\t", "," }, StringSplitOptions.RemoveEmptyEntries);
+            if (s[0].Contains('\"'))
+            {
+                for (int i = 0; i < s.Count(); i++)
+                {
+                    s[i] = s[i].Replace("\",\"", string.Empty);
+                    s[i] = s[i].Replace('\"', ' ');
+                }
+            }
+            return s;
         }
 
         private void button1_Click_1(object sender, EventArgs e)
