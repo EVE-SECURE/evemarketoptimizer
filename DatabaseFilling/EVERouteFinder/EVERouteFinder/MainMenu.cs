@@ -40,15 +40,6 @@ namespace EVERouteFinder
 
         private void loopNodes()
         {
-            //int routes = 0;
-            //foreach(Node n in getSolarSystems())
-            //{
-            //    Parallel.ForEach(getSolarSystems(), n1 =>
-            //        {
-            //            loop(n, n1);
-            //        }
-            //    );
-            //}
             List<Node> myList = getSolarSystems();
             ParallelOptions po = new ParallelOptions();
             po.MaxDegreeOfParallelism = Environment.ProcessorCount;
@@ -56,11 +47,6 @@ namespace EVERouteFinder
             Parallel.ForEach(myList, po, n =>
             {
                 List<Node> mylist2 = getSolarSystems();
-                //Parallel.ForEach(mylist2.AsParallel(), po2, n1 =>
-                //{
-                //    loop(n, n1);
-                //}
-                //);
                 foreach (Node n1 in mylist2)
                 {
                     loop(n, n1);
@@ -73,54 +59,51 @@ namespace EVERouteFinder
 
         private void loop(Node n, Node n1)
         {
-                    if(n.ID != n1.ID)
+            if (n.ID != n1.ID)
+            {
+                int tid = Thread.CurrentThread.ManagedThreadId;
+                PathOperations pop = new PathOperations(n, n1);
+                pop.nofactor = false;
+                pop.start.nofactor = false;
+                pop.goal.nofactor = false;
+                List<Node> route = new List<Node>();
+
+                route = pop.Evaluate();
+                string systems = "";
+                int i = 0;
+                foreach (Node n2 in route)
+                {
+                    systems += "System: " + " " + n2.Name + " " + n2.Security.ToString() + " " + n2.Region.ToString() + " " + "\r\n"; //n2.f_score.ToString() +
+                    i++;
+                }
+                pop = new PathOperations(n, n1);
+                pop.nofactor = true;
+                pop.start.nofactor = true;
+                pop.goal.nofactor = true;
+                route = new List<Node>();
+
+                route = pop.Evaluate();
+                string systems1 = "";
+                int a = 0;
+                foreach (Node n2 in route)
+                {
+                    systems1 += "System: " + " " + n2.Name + " " + n2.Security.ToString() + " " + n2.Region.ToString() + " " + "\r\n"; //n2.f_score.ToString() +
+                    a++;
+                }
+                if (systems != systems1)
+                {
+                    SetText(n.Name + " " + n1.Name + " " + "Not qualified " + a.ToString() + ", " + (i - a).ToString() + "\r\n", 2);
+                    if (i - a > 0)
                     {
-                        int tid = Thread.CurrentThread.ManagedThreadId;
-                        PathOperations pop = new PathOperations(n, n1);
-                        pop.nofactor = false;
-                        pop.start.nofactor = false;
-                        pop.goal.nofactor = false;
-                        List<Node> route = new List<Node>();
-
-                        route = pop.Evaluate();
-                        string systems = "";
-                        int i = 0;
-                        foreach (Node n2 in route)
-                        {
-                            systems += "System: " + " " + n2.Name + " " + n2.Security.ToString() + " " + n2.Region.ToString() + " " +  "\r\n"; //n2.f_score.ToString() +
-                            i++;
-                        }
-                        //routes++;
-                        pop = new PathOperations(n, n1);
-                        pop.nofactor = true;
-                        pop.start.nofactor = true;
-                        pop.goal.nofactor = true;
-                        route = new List<Node>();
-
-                        route = pop.Evaluate();
-                        string systems1 = "";
-                        int a = 0;
-                        foreach (Node n2 in route)
-                        {
-                            systems1 += "System: " + " " + n2.Name + " " + n2.Security.ToString() + " " + n2.Region.ToString() + " " + "\r\n"; //n2.f_score.ToString() +
-                            a++;
-                        }
-                        //routes++;
-                        //this.Text = routes.ToString();
-                        if (systems != systems1)
-                        {
-                            SetText(n.Name + " " + n1.Name + " " + "Not qualified " + a.ToString() + ", " + (i - a).ToString() + "\r\n", 2);
-                            if (i - a > 0)
-                            {
-                                Settings.SEVEDBSettings.factor -= 0.01;
-                                SetText(Settings.SEVEDBSettings.factor.ToString() + " /// " + DateTime.Now.ToLongTimeString() + "\r\n", 3);
-                            }
-                        }
-                        else
-                        {
-                            SetText(n.Name + " " + n1.Name + " " + "Qualified " + a.ToString() + "\r\n", 1);
-                        }
+                        Settings.SEVEDBSettings.factor -= 0.01;
+                        SetText(Settings.SEVEDBSettings.factor.ToString() + " /// " + DateTime.Now.ToLongTimeString() + "\r\n", 3);
                     }
+                }
+                else
+                {
+                    SetText(n.Name + " " + n1.Name + " " + "Qualified " + a.ToString() + "\r\n", 1);
+                }
+            }
         }
 
         private void SetText(string text, int thread)
@@ -172,47 +155,33 @@ namespace EVERouteFinder
 
         private void loopMarketDatabase()
         {
-            //IEnumerable<string> stringList = File.ReadLines(@"C:\Users\Greitone\Downloads\2011-09-05.dump\2011-09-05.dump");
-            IEnumerable<string> stringList = File.ReadLines(@"C:\Users\Greitone\Desktop\output.txt");
-            ParallelOptions po = new ParallelOptions();
-            po.MaxDegreeOfParallelism =  Environment.ProcessorCount;
-            Parallel.ForEach(stringList, po, n =>
+            DirectoryInfo di = new DirectoryInfo(@"C:\Users\Greitone\EVEMarketDumps");
+            foreach(FileInfo fi in di.GetFiles())
             {
-                //n.Replace("\",\"", ",");
-                //n.Replace("\"", "");
-                //n.Replace('	'.ToString(), ",");
-                
-                string[] s = n.Split(new string[] {"\",\"", "\t"}, StringSplitOptions.RemoveEmptyEntries);
-                if (s[0].Contains('\"'))
+                IEnumerable<string> stringList = File.ReadLines(fi.FullName);
+                ParallelOptions po = new ParallelOptions();
+                po.MaxDegreeOfParallelism = Environment.ProcessorCount;
+                Parallel.ForEach(stringList, po, n =>
                 {
-                    for (int i = 0; i < s.Count(); i++)
+                    string[] s = n.Split(new string[] { "\",\"", "\t" }, StringSplitOptions.RemoveEmptyEntries);
+                    if (s[0].Contains('\"'))
                     {
-                        s[i] = s[i].Replace("\",\"", string.Empty);
-                        s[i] = s[i].Replace('\"', ' ');
-                        //s2.Replace("\"", string.Empty);
+                        for (int i = 0; i < s.Count(); i++)
+                        {
+                            s[i] = s[i].Replace("\",\"", string.Empty);
+                            s[i] = s[i].Replace('\"', ' ');
+                        }
                     }
+                    EVEOrder o = new EVEOrder(s);
+                    o.InsertToDB();
                 }
-                EVEOrder o = new EVEOrder(s);
-                o.InsertToDB();
+                );
             }
-            );
-
         }
 
         private void button1_Click_1(object sender, EventArgs e)
         {
-
             inputMarketDatabaseDump();
-            //IEnumerable<string> ss = 
-            //foreach (string s in ss)
-            //{
-            //    foreach (string s1 in s.Split(new Char[] { '	' }))
-            //    {
-            //        Console.WriteLine(s1);
-            //    }
-
-            //}
-
         }
 
         private void MainMenu_Load(object sender, EventArgs e)
