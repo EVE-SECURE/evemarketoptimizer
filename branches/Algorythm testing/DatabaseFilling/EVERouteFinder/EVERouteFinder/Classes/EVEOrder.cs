@@ -24,10 +24,10 @@ namespace EVERouteFinder.Classes
 
         bool isFileHeader = false;
 
-        public long OrderID { get { return this.orderID; } set { this.orderID = value;} }
-        public int RegionID { get { return this.regionID;} set { this.regionID = value;} }
-        public int SystemID { get { return this.systemID;} set { this.systemID = value;} }
-        public int StationID { get { return this.stationID;} set { this.stationID = value;} }
+        public long OrderID { get { return this.orderID; } set { this.orderID = value; } }
+        public int RegionID { get { return this.regionID; } set { this.regionID = value; } }
+        public int SystemID { get { return this.systemID; } set { this.systemID = value; } }
+        public int StationID { get { return this.stationID; } set { this.stationID = value; } }
         public int TypeID { get { return this.typeID; } set { this.typeID = value; } }
         public int Bid { get { return this.bid; } set { this.bid = value; } } //bid = 0 means it's a sell order, bid=1 means it's a buying order
         public double Price { get { return this.price; } set { this.price = value; } }
@@ -39,7 +39,7 @@ namespace EVERouteFinder.Classes
         public DateTime Reported { get { return this.reported; } set { this.reported = value; } }
 
         public EVEOrder(string[] order)
-        {        
+        {
             //price,
             //volRemaining,
             //typeID,
@@ -55,12 +55,12 @@ namespace EVERouteFinder.Classes
             //solarSystemID,
             //jumps,
             bool success = false;
-            if(order[0].Contains("price"))
+            if (order[0].Contains("price"))
             {
                 this.isFileHeader = true;
                 return;
             }
-            else if(order[0].Contains('.')) // then it's EVE Market log export
+            else if (order[0].Contains('.')) // then it's EVE Market log export
             {
                 if (long.TryParse(order[4], out this.orderID) &&
                     int.TryParse(order[11], out this.regionID) &&
@@ -69,39 +69,39 @@ namespace EVERouteFinder.Classes
                     int.TryParse(order[2], out this.typeID) &&
                     double.TryParse(order[0], System.Globalization.NumberStyles.AllowDecimalPoint, new System.Globalization.CultureInfo("en-US"), out this.price) &&
                     int.TryParse(order[6], out this.minVolume) &&
-                    int.TryParse(order[1].Replace(".0",""), out this.volRemain) &&
+                    int.TryParse(order[1].Replace(".0", ""), out this.volRemain) &&
                     int.TryParse(order[5], out this.volEnter) &&
                     DateTime.TryParse(DateTime.Now.ToString(), out this.reported))
+                {
+                    string s = order[9].Replace('\0', ' ');
+                    s += ":00:00:00";
+                    if (TimeSpan.TryParse(s, out this.duration))
                     {
-                        string s = order[9].Replace('\0', ' ');
-                        s += ":00:00:00";
-                        if(TimeSpan.TryParse(s, out this.duration))
+                        s = order[8].Replace('\0', ' ').Replace("   ", "_").Replace(" ", "").Replace("_", " ");
+
+                        if (DateTime.TryParse(s, out this.issued))
                         {
-                            s = order[8].Replace('\0', ' ').Replace("   ", "_").Replace(" ", "").Replace("_", " ");
-                            
-                            if (DateTime.TryParse(s, out this.issued))
+                            switch (order[7].ToUpper())
                             {
-                                switch (order[7].ToUpper())
-                                {
-                                    case "TRUE":
-                                        success=int.TryParse("1", out this.bid);
-                                        break;
-                                    case "FALSE":
-                                        success = int.TryParse("0", out this.bid);
-                                        break;
-                                    default:
-                                        success = false;
-                                        break;
-                                }
+                                case "TRUE":
+                                    success = int.TryParse("1", out this.bid);
+                                    break;
+                                case "FALSE":
+                                    success = int.TryParse("0", out this.bid);
+                                    break;
+                                default:
+                                    success = false;
+                                    break;
                             }
                         }
                     }
+                }
 
             }
             else if (order[6].Contains('.')) //then it's CSV
             {
-                if (long.TryParse(order[0], out this.orderID) && 
-                    int.TryParse(order[1], out this.regionID) && 
+                if (long.TryParse(order[0], out this.orderID) &&
+                    int.TryParse(order[1], out this.regionID) &&
                     int.TryParse(order[2], out this.systemID) &&
                     int.TryParse(order[3], out this.stationID) &&
                     int.TryParse(order[4], out this.typeID) &&
@@ -112,14 +112,14 @@ namespace EVERouteFinder.Classes
                     int.TryParse(order[9], out this.volEnter) &&
                     DateTime.TryParse(order[10], out this.issued) &&
                     DateTime.TryParse(order[14], out this.reported))
+                {
+                    string s = order[11].Replace(" days, ", ":");
+                    if (s == order[11])
                     {
-                        string s = order[11].Replace(" days, ", ":");
-                        if (s == order[11])
-                        {
-                            s = order[11].Replace(" day, ", ":");
-                        }
-                        success = TimeSpan.TryParse(s, out this.duration);
+                        s = order[11].Replace(" day, ", ":");
                     }
+                    success = TimeSpan.TryParse(s, out this.duration);
+                }
             }
             else //then it's DB dump
             {
@@ -137,7 +137,7 @@ namespace EVERouteFinder.Classes
                     DateTime.TryParse(order[14], out this.reported))
                 {
                     string s = order[11].Replace(" days", ":00:00:00");
-                    
+
                     if (s == order[11])
                     {
                         s = order[11].Replace(" day", ":00:00:00");
@@ -160,19 +160,20 @@ namespace EVERouteFinder.Classes
             }
             else
             {
-                long.TryParse(s[0], out orderID);
-                int.TryParse(s[1], out regionID);
-                int.TryParse(s[2], out systemID);
-                int.TryParse(s[3], out stationID);
-                int.TryParse(s[4], out typeID);
-                int.TryParse(s[5], out bid);
-                double.TryParse(s[6], System.Globalization.NumberStyles.AllowDecimalPoint, new System.Globalization.CultureInfo("en-US"), out this.price);
-                int.TryParse(s[7], out minVolume);
-                int.TryParse(s[8], out volRemain);
-                int.TryParse(s[9], out volEnter);
-                DateTime.TryParse(s[10], out issued);
-                TimeSpan.TryParse(s[11] + ":00:00:00", out duration);
-                DateTime.TryParse(s[12], out reported);
+                bool success = false;
+                success = long.TryParse(s[0], out orderID) && 
+                    int.TryParse(s[1], out regionID) &&
+                    int.TryParse(s[2], out systemID) &&
+                    int.TryParse(s[3], out stationID) &&
+                    int.TryParse(s[4], out typeID) &&
+                    int.TryParse(s[5], out bid) && 
+                    double.TryParse(s[6], System.Globalization.NumberStyles.AllowDecimalPoint, new System.Globalization.CultureInfo("en-US"), out this.price) &&
+                    int.TryParse(s[7], out minVolume) && 
+                    int.TryParse(s[8], out volRemain) &&
+                    int.TryParse(s[9], out volEnter) &&
+                    DateTime.TryParse(s[10], out issued) &&
+                    TimeSpan.TryParse(s[11] + ":00:00:00", out duration) &&
+                    DateTime.TryParse(s[12], out reported);
             }
         }
 
