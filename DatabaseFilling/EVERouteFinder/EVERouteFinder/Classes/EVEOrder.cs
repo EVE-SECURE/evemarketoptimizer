@@ -22,6 +22,8 @@ namespace EVERouteFinder.Classes
         TimeSpan duration;
         DateTime reported;
 
+        bool isFileHeader = false;
+
         public long OrderID { get { return this.orderID; } set { this.orderID = value;} }
         public int RegionID { get { return this.regionID;} set { this.regionID = value;} }
         public int SystemID { get { return this.systemID;} set { this.systemID = value;} }
@@ -37,9 +39,66 @@ namespace EVERouteFinder.Classes
         public DateTime Reported { get { return this.reported; } set { this.reported = value; } }
 
         public EVEOrder(string[] order)
-        {
+        {        
+            //price,
+            //volRemaining,
+            //typeID,
+            //range,
+            //orderID,
+            //volEntered,
+            //minVolume,
+            //bid,
+            //issueDate,
+            //duration,
+            //stationID,
+            //regionID,
+            //solarSystemID,
+            //jumps,
             bool success = false;
-            if (order[6].Contains('.')) //then it's CSV
+            if(order[0].Contains("price"))
+            {
+                this.isFileHeader = true;
+                return;
+            }
+            else if(order[0].Contains('.')) // then it's EVE Market log export
+            {
+                if (long.TryParse(order[4], out this.orderID) &&
+                    int.TryParse(order[11], out this.regionID) &&
+                    int.TryParse(order[12], out this.systemID) &&
+                    int.TryParse(order[10], out this.stationID) &&
+                    int.TryParse(order[2], out this.typeID) &&
+                    double.TryParse(order[0], System.Globalization.NumberStyles.AllowDecimalPoint, new System.Globalization.CultureInfo("en-US"), out this.price) &&
+                    int.TryParse(order[6], out this.minVolume) &&
+                    int.TryParse(order[1].Replace(".0",""), out this.volRemain) &&
+                    int.TryParse(order[5], out this.volEnter) &&
+                    DateTime.TryParse(DateTime.Now.ToString(), out this.reported))
+                    {
+                        string s = order[9].Replace('\0', ' ');
+                        s += ":00:00:00";
+                        if(TimeSpan.TryParse(s, out this.duration))
+                        {
+                            s = order[8].Replace('\0', ' ').Replace("   ", "_").Replace(" ", "").Replace("_", " ");
+                            
+                            if (DateTime.TryParse(s, out this.issued))
+                            {
+                                switch (order[7].ToUpper())
+                                {
+                                    case "TRUE":
+                                        success=int.TryParse("1", out this.bid);
+                                        break;
+                                    case "FALSE":
+                                        success = int.TryParse("0", out this.bid);
+                                        break;
+                                    default:
+                                        success = false;
+                                        break;
+                                }
+                            }
+                        }
+                    }
+
+            }
+            else if (order[6].Contains('.')) //then it's CSV
             {
                 if (long.TryParse(order[0], out this.orderID) && 
                     int.TryParse(order[1], out this.regionID) && 
@@ -92,17 +151,108 @@ namespace EVERouteFinder.Classes
             }
         }
 
+        public EVEOrder(string[] s, bool isQuery)
+        {
+            if (isQuery == false)
+            {
+                long.TryParse(s[0], out orderID);
+                DateTime.TryParse(s[12], out reported);
+            }
+            else
+            {
+                long.TryParse(s[0], out orderID);
+                int.TryParse(s[1], out regionID);
+                int.TryParse(s[2], out systemID);
+                int.TryParse(s[3], out stationID);
+                int.TryParse(s[4], out typeID);
+                int.TryParse(s[5], out bid);
+                double.TryParse(s[6], System.Globalization.NumberStyles.AllowDecimalPoint, new System.Globalization.CultureInfo("en-US"), out this.price);
+                int.TryParse(s[7], out minVolume);
+                int.TryParse(s[8], out volRemain);
+                int.TryParse(s[9], out volEnter);
+                DateTime.TryParse(s[10], out issued);
+                TimeSpan.TryParse(s[11] + ":00:00:00", out duration);
+                DateTime.TryParse(s[12], out reported);
+            }
+        }
+
         public bool InsertToDB()
         {
-            int rows=-1;
+            if (this.isFileHeader == true)
+            {
+                return false;
+            }
+            EVEOrder eo = CheckExists();
+            if (eo == null)
+            {
+                int rows = -1;
+                EVEDBoperations orderOperations = new EVEDBoperations();
+                orderOperations.startEVEDBConnection(true);
+                orderOperations.openEVEDBConnection();
+                orderOperations.setEVEDBQuery(orderOperations.premadeQuery_insertToEveMarketData(this));
+                rows = orderOperations.eveDBExecuteNonQuery();
+                orderOperations.closeEVEDBConnection();
+                return rows > 0;
+            }
+            else if (eo.Reported >= this.reported)
+            {
+                return false;
+            }
+            else
+            {
+                int rows = -1;
+                EVEDBoperations orderOperations = new EVEDBoperations();
+                orderOperations.startEVEDBConnection(true);
+                orderOperations.openEVEDBConnection();
+                orderOperations.setEVEDBQuery(orderOperations.premadeQuery_UpdateEveOrder(this));
+                rows = orderOperations.eveDBExecuteNonQuery();
+                orderOperations.closeEVEDBConnection();
+                return rows > 0;
+            }
+        }
+
+        private EVEOrder CheckExists()
+        {
             EVEDBoperations orderOperations = new EVEDBoperations();
             orderOperations.startEVEDBConnection(true);
             orderOperations.openEVEDBConnection();
-            orderOperations.setEVEDBQuery(orderOperations.premadeQuery_insertToEveMarketData(this));
-            rows = orderOperations.eveDBExecuteNonQuery();
-            orderOperations.closeEVEDBConnection();
-            return rows > 0;
+            orderOperations.setEVEDBQuery(orderOperations.premadeQuery_getEveOrder(this.orderID));
+            if (orderOperations.eveDBQueryRead())
+            {
+                string[] s = new string[13];
+                for (int i = 0; i < 13; i++)
+                {
+                    s[i] = orderOperations.eveDBReader[i].ToString();
+                }
+                orderOperations.eveDBQueryClose();
+                orderOperations.closeEVEDBConnection();
+                EVEOrder eo = new EVEOrder(s, false);
+                return eo;
+            }
+            else
+            {
+                orderOperations.eveDBQueryClose();
+                orderOperations.closeEVEDBConnection();
+                return null;
+            }
         }
+
+        //EVE market export data order
+        //price,
+        //volRemaining,
+        //typeID,
+        //range,
+        //orderID,
+        //volEntered,
+        //minVolume,
+        //bid,
+        //issueDate,
+        //duration,
+        //stationID,
+        //regionID,
+        //solarSystemID,
+        //jumps,
+
         //DB dump data order
         //regionid,
         //systemid,
