@@ -50,7 +50,6 @@ namespace EVERouteFinder.Classes
             }
             catch (Exception ex)
             {
-                Thread.CurrentThread.Abort();
                 throw new Exception("Error while opening the EVEDB Connection");
             }
         }
@@ -64,7 +63,7 @@ namespace EVERouteFinder.Classes
         {
             SqlCommand myCommand = new SqlCommand(query, this.myConnection);
             this.myCommand = myCommand;
-            if (!marketDB)
+            if (!marketDB || query.ToUpper().StartsWith("SELECT"))
             {
                 try
                 {
@@ -73,7 +72,6 @@ namespace EVERouteFinder.Classes
                 }
                 catch (Exception ex)
                 {
-                    Thread.CurrentThread.Abort();
                     throw new Exception("Error while Executing the EVEDB command query");
                 }
             }
@@ -87,7 +85,6 @@ namespace EVERouteFinder.Classes
             }
             catch (Exception ex)
             {
-                Thread.CurrentThread.Abort();
                 throw new Exception("Error while reading the EVEDB reader");
             }
         }
@@ -166,6 +163,18 @@ namespace EVERouteFinder.Classes
         public string premadeQuery_insertToEveMarketData(EVEOrder order)
         {
             string s = "insert into dbo.EVEMarketData values(" + order.OrderID.ToString() + ", " + order.RegionID.ToString() + ", " + order.SystemID.ToString() + ", " + order.StationID.ToString() + ", " + order.TypeID.ToString() + ", " + order.Bid.ToString() + ", " + order.Price.ToString(new System.Globalization.CultureInfo("en-US")) + ", " + order.MinVolume.ToString() + ", " + order.VolRemain.ToString() + ", " + order.VolEnter.ToString() + ", " + "'" + order.Issued.ToString("yyyy/MM/dd hh:mm:ss") + "'" + ", " + order.Duration.TotalDays.ToString().Replace(',', '.') + ", " + "'" + order.Reported.ToString("yyyy/MM/dd hh:mm:ss") + "'" + ");";
+            return s;
+        }
+
+        public string premadeQuery_getEveOrder(long orderID)
+        {
+            string s = "SELECT * FROM [EVEMarketDB].[dbo].[EVEMarketData] where orderID = " + orderID.ToString();
+            return s;
+        }
+
+        public string premadeQuery_UpdateEveOrder(EVEOrder order)
+        {
+            string s = "update dbo.EVEMarketData set volremain = " + order.VolRemain.ToString() + ", reported = '" + order.Reported.ToString("yyyy/MM/dd hh:mm:ss") + "' where orderID = " + order.OrderID.ToString();
             return s;
         }
 
