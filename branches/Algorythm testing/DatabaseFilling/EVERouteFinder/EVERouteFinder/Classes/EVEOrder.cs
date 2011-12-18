@@ -160,20 +160,22 @@ namespace EVERouteFinder.Classes
             }
             else
             {
-                bool success = false;
-                success = long.TryParse(s[0], out orderID) && 
+                if (!long.TryParse(s[0], out orderID) &&
                     int.TryParse(s[1], out regionID) &&
                     int.TryParse(s[2], out systemID) &&
                     int.TryParse(s[3], out stationID) &&
                     int.TryParse(s[4], out typeID) &&
-                    int.TryParse(s[5], out bid) && 
+                    int.TryParse(s[5], out bid) &&
                     double.TryParse(s[6], System.Globalization.NumberStyles.AllowDecimalPoint, new System.Globalization.CultureInfo("en-US"), out this.price) &&
-                    int.TryParse(s[7], out minVolume) && 
+                    int.TryParse(s[7], out minVolume) &&
                     int.TryParse(s[8], out volRemain) &&
                     int.TryParse(s[9], out volEnter) &&
                     DateTime.TryParse(s[10], out issued) &&
                     TimeSpan.TryParse(s[11] + ":00:00:00", out duration) &&
-                    DateTime.TryParse(s[12], out reported);
+                    DateTime.TryParse(s[12], out reported))
+                {
+                    throw new ArgumentException("The provided string does not properly contain the required data to initialize the EveOrder");
+                }
             }
         }
 
