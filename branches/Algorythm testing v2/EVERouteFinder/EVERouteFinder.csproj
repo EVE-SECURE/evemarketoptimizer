@@ -136,9 +136,10 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
-    <Content Include="Diagrams\nodeList.xml" />
+    <Folder Include="Diagrams\" />
+  </ItemGroup>
+  <ItemGroup>
     <Content Include="Statistics\ConvergenceFactor.txt" />
     <Content Include="Statistics\RouteData.txt" />
   </ItemGroup>
