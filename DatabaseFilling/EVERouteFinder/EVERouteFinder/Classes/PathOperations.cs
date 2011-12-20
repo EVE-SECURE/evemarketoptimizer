@@ -41,12 +41,12 @@ namespace EVERouteFinder.Classes
         public List<Node> avoidanceList { get; set; }
         List<Node> closedset;
         List<Node> openset;
-        public bool nofactor = true;
-        private DateTime timestamp;
+        public bool nofactor;
+        //private DateTime timestamp;
 
         public List<Node> Evaluate()
         {
-            timestamp = DateTime.Now;
+            //timestamp = DateTime.Now;
             this.start.goal = this.goal;
             this.openset.Add(this.start);
             //nodeOset(this, new nodeInOpenSetEventArgs(this.start, true));
@@ -74,40 +74,40 @@ namespace EVERouteFinder.Classes
                     //);
                     foreach (Node y in x.getNeighborNodes())
                     {
-                        if (this.searchbyID(avoidanceList, y.ID) == null)
-                        {
-                            y.goal = this.goal;
-                            y.nofactor = this.nofactor;
-                            double tentative_g_score = x.g_score + 1; //el 1 se sustituiria por dist(x,y) aplicable segun el caso
-                            bool tentative_is_better = false;
+                        //if (this.searchbyID(avoidanceList, y.ID) == null)
+                        //{
+                        y.goal = this.goal;
+                        y.nofactor = this.nofactor;
+                        double tentative_g_score = x.g_score + 1; //el 1 se sustituiria por dist(x,y) aplicable segun el caso
+                        bool tentative_is_better = false;
 
-                            if (this.searchbyID(this.closedset, y.ID) != null)
+                        if (this.searchbyID(this.closedset, y.ID) != null)
+                        {
+                            y.g_score = this.searchbyID(this.closedset, y.ID).g_score;
+                        }
+                        else
+                        {
+                            if (this.searchbyID(this.openset, y.ID) == null)
                             {
-                                y.g_score = this.searchbyID(this.closedset, y.ID).g_score;
-                            }
-                            else
-                            {
-                                if (this.searchbyID(this.openset, y.ID) == null)
-                                {
-                                    this.openset.Add(y);
-                                    //nodeOset(this, new nodeInOpenSetEventArgs(y, true));
-                                    tentative_is_better = true;
-                                }
-                            }
-                            if (tentative_g_score < y.g_score)
-                            {
+                                this.openset.Add(y);
+                                //nodeOset(this, new nodeInOpenSetEventArgs(y, true));
                                 tentative_is_better = true;
                             }
-                            else
-                            {
-                                tentative_is_better = false;
-                            }
-                            if (tentative_is_better)
-                            {
-                                y.camefrom = x;
-                                y.g_score = tentative_g_score;
-                            }
                         }
+                        if (tentative_g_score < y.g_score)
+                        {
+                            tentative_is_better = true;
+                        }
+                        else
+                        {
+                            tentative_is_better = false;
+                        }
+                        if (tentative_is_better)
+                        {
+                            y.camefrom = x;
+                            y.g_score = tentative_g_score;
+                        }
+                        //}
                     }
                 }
             }
@@ -126,30 +126,30 @@ namespace EVERouteFinder.Classes
 //          return nodeList.Find(delegate(Node n){return n.ID == id;});
         }
 
-        double heuristicFunction(Node from, Node to)
-        {
-            double a = 0;
-            return a;
-        }
+        //double heuristicFunction(Node from, Node to)
+        //{
+        //    double a = 0;
+        //    return a;
+        //}
 
         Node getLowestFscoreNode(List<Node> nodelist)
         {
             int lowestindex = 0;
             double lowestFscore = double.MaxValue;
-            Parallel.For(0, nodelist.Count, i =>
+            for(int i = 0; i < nodelist.Count; i++)
             {
                 if (nodelist[i].f_score < lowestFscore)
                 {
                     lowestindex = i;
                     lowestFscore = nodelist[i].f_score;
                 }
-            });
+            }
             return nodelist[lowestindex];
         }
 
         List<Node> ReconstructPath(Node cameFrom, Node currentNode)
         {
-            TimeSpan t = timestamp.Subtract(DateTime.Now);
+            //TimeSpan t = timestamp.Subtract(DateTime.Now);
             List<Node> Path = new List<Node>();
             if (cameFrom.camefrom != null)
             {
