@@ -21,9 +21,9 @@ namespace EVERouteFinder.Settings
         //        DBConnectionString = ((EVEDBSettings)xmlSettingsSerializer.Load(SettingsPath, "EVERouteFinder.Settings.EVEDBSettings")).DBConnectionString;
         //    }
         //}
-        public static double factor = 35; // 9.5;
-        public static double avgFactor = 35;
-        private static double avgFactorsum = 35;
+        public static double factor = 34; // 9.5;
+        public static double avgFactor = 34;
+        private static double avgFactorsum = 34;
         public static void addAvg()
         {
             times++;

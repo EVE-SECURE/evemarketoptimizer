@@ -213,7 +213,15 @@ namespace EVERouteFinder
         private void button1_Click_1(object sender, EventArgs e)
         {
             //inputMarketDatabaseDump();
-            searchFactor();
+            //searchFactor();
+            List<Node> nodelist = getSolarSystems();
+            foreach (Node n in nodelist)
+            {
+                n.getNeighborNodes();
+            }
+            XmlOperations xo = new XmlOperations();
+            xo.Save(nodelist, Path.Combine(Directory.GetCurrentDirectory(), "nodeList.xml"), nodelist.GetType().ToString());
+
         }
 
         private void MainMenu_Load(object sender, EventArgs e)
