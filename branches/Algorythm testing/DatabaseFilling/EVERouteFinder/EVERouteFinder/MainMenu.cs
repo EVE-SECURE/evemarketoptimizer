@@ -62,6 +62,7 @@ namespace EVERouteFinder
             if (n.ID != n1.ID)
             {
                 int tid = Thread.CurrentThread.ManagedThreadId;
+                n.nofactor = n1.nofactor = false;
                 PathOperations pop = new PathOperations(n, n1);
                 pop.nofactor = false;
                 pop.start.nofactor = false;
@@ -76,6 +77,8 @@ namespace EVERouteFinder
                     systems += "System: " + " " + n2.Name + " " + n2.Security.ToString() + " " + n2.Region.ToString() + " " + "\r\n"; //n2.f_score.ToString() +
                     i++;
                 }
+                n.resetNeighborNodes();
+                n1.resetNeighborNodes();
                 pop = new PathOperations(n, n1);
                 pop.nofactor = true;
                 pop.start.nofactor = true;
@@ -92,16 +95,28 @@ namespace EVERouteFinder
                 }
                 if (systems != systems1)
                 {
-                    SetText(n.Name + " " + n1.Name + " " + "Not qualified " + a.ToString() + ", " + (i - a).ToString() + "\r\n", 2);
+                    SetText(n.Name + " " + n1.Name + " " + "Not qualified " + a.ToString() + ", " + (i - a).ToString() + "\r\n", 1);
                     if (i - a > 0)
                     {
-                        Settings.SEVEDBSettings.factor -= 0.01;
-                        SetText(Settings.SEVEDBSettings.factor.ToString() + " /// " + DateTime.Now.ToLongTimeString() + "\r\n", 3);
+                        if (i - a < 5)
+                        {
+                            Settings.SEVEDBSettings.factor -= (i - a) * Settings.SEVEDBSettings.factor / 100;
+                        }
+                        else if (i - a < 10)
+                        {
+                            Settings.SEVEDBSettings.factor -= 1.2 * (i - a) * Settings.SEVEDBSettings.factor / 100;
+                        }
+                        else
+                        {
+                            Settings.SEVEDBSettings.factor -= 2 * (i - a) * Settings.SEVEDBSettings.factor / 100;
+                        }
+                        Settings.SEVEDBSettings.addAvg();
+                        SetText(Settings.SEVEDBSettings.factor.ToString() + "// Avg:" + Settings.SEVEDBSettings.avgFactor.ToString() + " /// Deviation: " + (i - a).ToString() + " // on " + DateTime.Now.ToLongTimeString() + "\r\n", 2);
                     }
                 }
                 else
                 {
-                    SetText(n.Name + " " + n1.Name + " " + "Qualified " + a.ToString() + "\r\n", 1);
+                    SetText(n.Name + " " + n1.Name + " " + "Qualified " + a.ToString() + "\r\n", 0);
                 }
             }
         }
@@ -115,11 +130,17 @@ namespace EVERouteFinder
             }
             else
             {
-                switch (thread % 3)
+                switch (thread)
                 {
                     case 0:
                         this.textBoxResult.AppendText(text);
                         this.textBoxResult.Focus();
+                        if ((this.textBoxResult.Lines.Count() + this.textBox2.Lines.Count()) % 10 == 0)
+                        {
+                            Settings.SEVEDBSettings.factor += Settings.SEVEDBSettings.factor / 1000;
+                            Settings.SEVEDBSettings.addAvg();
+                            this.textBox1.AppendText(Settings.SEVEDBSettings.factor.ToString() + "// Avg:" + Settings.SEVEDBSettings.avgFactor.ToString() + "\r\n");
+                        }
                         break;
                     case 1:
                         this.textBox2.AppendText(text);
@@ -192,6 +213,7 @@ namespace EVERouteFinder
         private void button1_Click_1(object sender, EventArgs e)
         {
             //inputMarketDatabaseDump();
+            searchFactor();
         }
 
         private void MainMenu_Load(object sender, EventArgs e)
