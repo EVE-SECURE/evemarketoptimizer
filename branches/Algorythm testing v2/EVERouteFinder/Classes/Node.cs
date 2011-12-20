@@ -15,7 +15,7 @@ namespace EVERouteFinder.Classes
         {
         }
 
-        public Node(Node n)
+        public Node(Node n, bool isNeighbor)
         {
             this.ID = n.ID;
             this.Name = n.Name;
@@ -27,9 +27,9 @@ namespace EVERouteFinder.Classes
             this.Region = n.Region;
             this.Security = n.Security;
             this.g_score = n.g_score;
-            foreach (Node n1 in n.neighborNodes)
+            if (!isNeighbor)
             {
-                this.neighborNodes.Add(new Node(n1));
+                fillNeighborList(n);
             }
         }
         
@@ -64,10 +64,13 @@ namespace EVERouteFinder.Classes
         [XmlArray()]
         public List<Node> neighborNodes = null;
 
-
-        public void resetNeighborNodes()
+        private void fillNeighborList(Node n)
         {
-            this.neighborNodes = null;
+            this.neighborNodes = new List<Node>();
+            foreach (Node n1 in n.neighborNodes)
+            {
+                this.neighborNodes.Add(new Node(n1, true));
+            }
         }
 
         private double hFunction(Node node, Node goal)
