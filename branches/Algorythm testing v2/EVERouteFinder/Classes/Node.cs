@@ -15,84 +15,23 @@ namespace EVERouteFinder.Classes
         {
         }
 
-        public Node(string queryData)
+        public Node(Node n)
         {
-            string[] separateString = queryData.Split(',');
-            this.Name = separateString[0];
-            this.X = Convert.ToDouble(separateString[1]);
-            this.Y = Convert.ToDouble(separateString[2]);
-            this.Z = Convert.ToDouble(separateString[3]);
-            this.System = Convert.ToInt32(separateString[4]);
-            this.Constellation = Convert.ToInt32(separateString[5]);
-            this.Region = Convert.ToInt32(separateString[6]);
-            this.Security = Convert.ToDouble(separateString[7]);
-            this.ID = Convert.ToInt32(separateString[8]);
-            this.g_score = double.MaxValue;
+            this.ID = n.ID;
+            this.Name = n.Name;
+            this.X = n.X;
+            this.Y = n.Y;
+            this.Z = n.Z;
+            this.System = n.System;
+            this.Constellation = n.Constellation;
+            this.Region = n.Region;
+            this.Security = n.Security;
+            this.g_score = n.g_score;
+            foreach (Node n1 in n.neighborNodes)
+            {
+                this.neighborNodes.Add(new Node(n1));
+            }
         }
-        public Node(string name, int id, double x, double y, double z, int system, int constellation, int region, double security)
-        {
-            this.Name = name;
-            this.ID = id;
-            this.X = x;
-            this.Y = y;
-            this.Z = z;
-            this.System = system;
-            this.Constellation = constellation;
-            this.Region = region;
-            this.Security = security;
-            this.g_score = double.MaxValue;
-            this.notnull = true;
-        }
-        public Node(int id)
-        {
-            //if (QueriesCache.systems.ContainsKey(id))
-            //{
-            //    Node n = new Node(QueriesCache.systems[id]);
-            //    this.Name = n.Name;
-            //    this.ID = n.ID;
-            //    this.X = n.X;
-            //    this.Y = n.Y;
-            //    this.Z = n.Z;
-            //    this.System = n.System;
-            //    this.Constellation = n.Constellation;
-            //    this.Region = n.Region;
-            //    this.Security = n.Security;
-            //    this.g_score = n.g_score;
-            //}
-            //else
-            //{       
-                //solarSystemName, x, y, z, solarSystemID, constellationID, regionID, security, id
-                string nodeData = "";
-                EVEDBoperations nodeOperations = new EVEDBoperations();
-                nodeOperations.startEVEDBConnection();
-                nodeOperations.openEVEDBConnection();
-                nodeOperations.setEVEDBQuery(nodeOperations.premadeQuery_getSolarSystemNode(id));
-                nodeOperations.eveDBQueryRead();
-                this.Name = nodeOperations.eveDBReader[0].ToString();
-                nodeData += this.Name + ",";
-                this.X = (double)nodeOperations.eveDBReader[1];
-                nodeData += this.X + ",";
-                this.Y = (double)nodeOperations.eveDBReader[2];
-                nodeData += this.Y + ",";
-                this.Z = (double)nodeOperations.eveDBReader[3];
-                nodeData += this.Z + ",";
-                this.System = (int)nodeOperations.eveDBReader[4];
-                nodeData += this.System + ",";
-                this.Constellation = (int)nodeOperations.eveDBReader[5];
-                nodeData += this.Constellation + ",";
-                this.Region = (int)nodeOperations.eveDBReader[6];
-                nodeData += this.Region + ",";
-                this.Security = (double)nodeOperations.eveDBReader[7];
-                nodeData += this.Security + ",";
-                this.ID = id;
-                nodeData += this.ID;
-                //QueriesCache.systems.Add(id, nodeData);
-                this.g_score = double.MaxValue;
-                nodeOperations.eveDBQueryClose();
-                nodeOperations.closeEVEDBConnection();
-            //}
-        }
-        //            return "select solarSystemName, x, y, z, solarSystemID, constellationID, regionID, security from dbo.mapSolarSystems where solarSystemID = " + sID.ToString();
         
         [XmlAttribute()]
         public string Name { get; set; }
@@ -125,27 +64,6 @@ namespace EVERouteFinder.Classes
         [XmlArray()]
         public List<Node> neighborNodes = null;
 
-        public List<Node> getNeighborNodes()
-        {
-            if (this.neighborNodes == null)
-            {
-                    EVEDBoperations nodeOperations = new EVEDBoperations();
-                    nodeOperations.startEVEDBConnection();
-                    nodeOperations.openEVEDBConnection();
-                    nodeOperations.setEVEDBQuery(nodeOperations.premadeQuery_getAdjacentSolarSystems(this.ID));
-                    this.neighborNodes = new List<Node>();
-                    while (nodeOperations.eveDBQueryRead())
-                    {
-                        int id = (int)nodeOperations.eveDBReader[0];
-
-                            this.neighborNodes.Add(new Node(id));
-                    }
-                    nodeOperations.eveDBQueryClose();
-                    nodeOperations.closeEVEDBConnection();
-                
-            }
-            return this.neighborNodes;
-        }
 
         public void resetNeighborNodes()
         {

@@ -8,6 +8,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Elementos de la solución",
 		EVERouteFinder\Diagrams\EVERouteFinder.vsd = EVERouteFinder\Diagrams\EVERouteFinder.vsd
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{584FDAF0-BEFB-4228-B07D-FF89AB99026A}"
+	ProjectSection(SolutionItems) = preProject
+		EVERouteFinder\bin\Debug\nodeList.xml = EVERouteFinder\bin\Debug\nodeList.xml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SubversionScc) = preSolution
 		Svn-Managed = True
