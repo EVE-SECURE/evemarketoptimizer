@@ -3,12 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Xml;
+using System.Xml.Serialization;
 
 namespace EVERouteFinder.Classes
 {
     public class Node
     {
         //solarSystemName, x, y, z, solarSystemID, constellationID, regionID, security, id
+        public Node()
+        {
+        }
+
         public Node(string queryData)
         {
             string[] separateString = queryData.Split(',');
@@ -39,22 +45,22 @@ namespace EVERouteFinder.Classes
         }
         public Node(int id)
         {
-            if (QueriesCache.systems.ContainsKey(id))
-            {
-                Node n = new Node(QueriesCache.systems[id]);
-                this.Name = n.Name;
-                this.ID = n.ID;
-                this.X = n.X;
-                this.Y = n.Y;
-                this.Z = n.Z;
-                this.System = n.System;
-                this.Constellation = n.Constellation;
-                this.Region = n.Region;
-                this.Security = n.Security;
-                this.g_score = n.g_score;
-            }
-            else
-            {       
+            //if (QueriesCache.systems.ContainsKey(id))
+            //{
+            //    Node n = new Node(QueriesCache.systems[id]);
+            //    this.Name = n.Name;
+            //    this.ID = n.ID;
+            //    this.X = n.X;
+            //    this.Y = n.Y;
+            //    this.Z = n.Z;
+            //    this.System = n.System;
+            //    this.Constellation = n.Constellation;
+            //    this.Region = n.Region;
+            //    this.Security = n.Security;
+            //    this.g_score = n.g_score;
+            //}
+            //else
+            //{       
                 //solarSystemName, x, y, z, solarSystemID, constellationID, regionID, security, id
                 string nodeData = "";
                 EVEDBoperations nodeOperations = new EVEDBoperations();
@@ -80,23 +86,33 @@ namespace EVERouteFinder.Classes
                 nodeData += this.Security + ",";
                 this.ID = id;
                 nodeData += this.ID;
-                QueriesCache.systems.Add(id, nodeData);
+                //QueriesCache.systems.Add(id, nodeData);
                 this.g_score = double.MaxValue;
                 nodeOperations.eveDBQueryClose();
                 nodeOperations.closeEVEDBConnection();
-            }
+            //}
         }
         //            return "select solarSystemName, x, y, z, solarSystemID, constellationID, regionID, security from dbo.mapSolarSystems where solarSystemID = " + sID.ToString();
-
+        
+        [XmlAttribute()]
         public string Name { get; set; }
+        [XmlAttribute()]
         public int ID { get; set; }
+        [XmlElement()]
         public double X { get; set; }
+        [XmlElement()]
         public double Y { get; set; }
+        [XmlElement()]
         public double Z { get; set; }
+        [XmlElement()]
         public int System { get; set; }
+        [XmlElement()]
         public int Constellation { get; set; }
+        [XmlElement()]
         public int Region { get; set; }
+        [XmlElement()]
         public double Security { get; set; }
+        [XmlElement()]
         public double g_score { get; set; }
         //public double ih_score;
         //public double h_score { get { return h_scoreF(); } set { this.ih_score = value; } }
@@ -106,18 +122,13 @@ namespace EVERouteFinder.Classes
         public Node goal { get; set; }
         public bool notnull = false;
         public bool nofactor = false;
-        private List<Node> neighborNodes = null;
+        [XmlArray()]
+        public List<Node> neighborNodes = null;
 
         public List<Node> getNeighborNodes()
         {
             if (this.neighborNodes == null)
             {
-                if (QueriesCache.jumpsInSystem.ContainsKey(this.ID))
-                {
-                    this.neighborNodes = QueriesCache.jumpsInSystem[this.ID];
-                }
-                else
-                {
                     EVEDBoperations nodeOperations = new EVEDBoperations();
                     nodeOperations.startEVEDBConnection();
                     nodeOperations.openEVEDBConnection();
@@ -126,19 +137,12 @@ namespace EVERouteFinder.Classes
                     while (nodeOperations.eveDBQueryRead())
                     {
                         int id = (int)nodeOperations.eveDBReader[0];
-                        if (QueriesCache.systems.ContainsKey(id))
-                        {
-                            this.neighborNodes.Add(QueriesCache.systems[id]);
-                        }
-                        else
-                        {
-                            this.neighborNodes.Add(new Node(id));
 
-                        }
+                            this.neighborNodes.Add(new Node(id));
                     }
                     nodeOperations.eveDBQueryClose();
                     nodeOperations.closeEVEDBConnection();
-                }
+                
             }
             return this.neighborNodes;
         }
