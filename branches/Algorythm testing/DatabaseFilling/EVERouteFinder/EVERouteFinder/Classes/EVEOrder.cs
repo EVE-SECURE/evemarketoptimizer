@@ -179,13 +179,31 @@ namespace EVERouteFinder.Classes
             }
         }
 
+        public EVEOrder(long orderID)
+        {
+            this.orderID = orderID;
+            EVEOrder thisorder = GetOrder();
+            this.price = thisorder.price;
+            this.regionID = thisorder.regionID;
+            this.systemID = thisorder.systemID;
+            this.stationID = thisorder.stationID;
+            this.typeID = thisorder.typeID;
+            this.bid = thisorder.bid;
+            this.reported = thisorder.reported;
+            this.minVolume = thisorder.minVolume;
+            this.volRemain = thisorder.volRemain;
+            this.volEnter = thisorder.volEnter;
+            this.issued = thisorder.issued;
+            this.duration = thisorder.duration;
+        }
+
         public bool InsertToDB()
         {
             if (this.isFileHeader == true)
             {
                 return false;
             }
-            EVEOrder eo = CheckExists();
+            EVEOrder eo = GetOrder();
             if (eo == null)
             {
                 int rows = -1;
@@ -214,7 +232,7 @@ namespace EVERouteFinder.Classes
             }
         }
 
-        private EVEOrder CheckExists()
+        private EVEOrder GetOrder()
         {
             EVEDBoperations orderOperations = new EVEDBoperations();
             orderOperations.startEVEDBConnection(true);

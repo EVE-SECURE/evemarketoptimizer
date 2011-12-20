@@ -178,6 +178,12 @@ namespace EVERouteFinder.Classes
             return s;
         }
 
+        public string premadeQuery_getProfitableOrders(int top)
+        {
+            string s = "SELECT top(" + top.ToString() + ") *  FROM [EVEMarketDB].[dbo].[ProfitTable]  order by totalProfit desc";
+            return s;
+        }
+
 #endregion
 
     }

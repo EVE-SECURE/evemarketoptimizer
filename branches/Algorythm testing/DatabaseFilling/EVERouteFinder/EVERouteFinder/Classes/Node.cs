@@ -8,6 +8,21 @@ namespace EVERouteFinder.Classes
 {
     public class Node
     {
+        //solarSystemName, x, y, z, solarSystemID, constellationID, regionID, security, id
+        public Node(string queryData)
+        {
+            string[] separateString = queryData.Split(',');
+            this.Name = separateString[0];
+            this.X = Convert.ToDouble(separateString[1]);
+            this.Y = Convert.ToDouble(separateString[2]);
+            this.Z = Convert.ToDouble(separateString[3]);
+            this.System = Convert.ToInt32(separateString[4]);
+            this.Constellation = Convert.ToInt32(separateString[5]);
+            this.Region = Convert.ToInt32(separateString[6]);
+            this.Security = Convert.ToDouble(separateString[7]);
+            this.ID = Convert.ToInt32(separateString[8]);
+            this.g_score = double.MaxValue;
+        }
         public Node(string name, int id, double x, double y, double z, int system, int constellation, int region, double security)
         {
             this.Name = name;
@@ -24,23 +39,52 @@ namespace EVERouteFinder.Classes
         }
         public Node(int id)
         {
-            EVEDBoperations nodeOperations = new EVEDBoperations();
-            nodeOperations.startEVEDBConnection();
-            nodeOperations.openEVEDBConnection();
-            nodeOperations.setEVEDBQuery(nodeOperations.premadeQuery_getSolarSystemNode(id));
-            nodeOperations.eveDBQueryRead();
-            this.ID = id;
-            this.Name = nodeOperations.eveDBReader[0].ToString();
-            this.X = (double)nodeOperations.eveDBReader[1];
-            this.Y = (double)nodeOperations.eveDBReader[2];
-            this.Z = (double)nodeOperations.eveDBReader[3];
-            this.System = (int)nodeOperations.eveDBReader[4];
-            this.Constellation = (int)nodeOperations.eveDBReader[5];
-            this.Region = (int)nodeOperations.eveDBReader[6];
-            this.Security = (double)nodeOperations.eveDBReader[7];
-            this.g_score = double.MaxValue;
-            nodeOperations.eveDBQueryClose();
-            nodeOperations.closeEVEDBConnection();
+            if (QueriesCache.systems.ContainsKey(id))
+            {
+                Node n = new Node(QueriesCache.systems[id]);
+                this.Name = n.Name;
+                this.ID = n.ID;
+                this.X = n.X;
+                this.Y = n.Y;
+                this.Z = n.Z;
+                this.System = n.System;
+                this.Constellation = n.Constellation;
+                this.Region = n.Region;
+                this.Security = n.Security;
+                this.g_score = n.g_score;
+            }
+            else
+            {       
+                //solarSystemName, x, y, z, solarSystemID, constellationID, regionID, security, id
+                string nodeData = "";
+                EVEDBoperations nodeOperations = new EVEDBoperations();
+                nodeOperations.startEVEDBConnection();
+                nodeOperations.openEVEDBConnection();
+                nodeOperations.setEVEDBQuery(nodeOperations.premadeQuery_getSolarSystemNode(id));
+                nodeOperations.eveDBQueryRead();
+                this.Name = nodeOperations.eveDBReader[0].ToString();
+                nodeData += this.Name + ",";
+                this.X = (double)nodeOperations.eveDBReader[1];
+                nodeData += this.X + ",";
+                this.Y = (double)nodeOperations.eveDBReader[2];
+                nodeData += this.Y + ",";
+                this.Z = (double)nodeOperations.eveDBReader[3];
+                nodeData += this.Z + ",";
+                this.System = (int)nodeOperations.eveDBReader[4];
+                nodeData += this.System + ",";
+                this.Constellation = (int)nodeOperations.eveDBReader[5];
+                nodeData += this.Constellation + ",";
+                this.Region = (int)nodeOperations.eveDBReader[6];
+                nodeData += this.Region + ",";
+                this.Security = (double)nodeOperations.eveDBReader[7];
+                nodeData += this.Security + ",";
+                this.ID = id;
+                nodeData += this.ID;
+                QueriesCache.systems.Add(id, nodeData);
+                this.g_score = double.MaxValue;
+                nodeOperations.eveDBQueryClose();
+                nodeOperations.closeEVEDBConnection();
+            }
         }
         //            return "select solarSystemName, x, y, z, solarSystemID, constellationID, regionID, security from dbo.mapSolarSystems where solarSystemID = " + sID.ToString();
 
@@ -62,25 +106,46 @@ namespace EVERouteFinder.Classes
         public Node goal { get; set; }
         public bool notnull = false;
         public bool nofactor = false;
-        private List<Node> neighborNodes;
+        private List<Node> neighborNodes = null;
 
         public List<Node> getNeighborNodes()
         {
-            if (this.neighborNodes != null)
+            if (this.neighborNodes == null)
             {
-                EVEDBoperations nodeOperations = new EVEDBoperations();
-                nodeOperations.startEVEDBConnection();
-                nodeOperations.openEVEDBConnection();
-                nodeOperations.setEVEDBQuery(nodeOperations.premadeQuery_getAdjacentSolarSystems(this.ID));
-                this.neighborNodes= new List<Node>();
-                while (nodeOperations.eveDBQueryRead())
+                if (QueriesCache.jumpsInSystem.ContainsKey(this.ID))
                 {
-                    this.neighborNodes.Add(new Node((int)nodeOperations.eveDBReader[0]));
+                    this.neighborNodes = QueriesCache.jumpsInSystem[this.ID];
                 }
-                nodeOperations.eveDBQueryClose();
-                nodeOperations.closeEVEDBConnection();
+                else
+                {
+                    EVEDBoperations nodeOperations = new EVEDBoperations();
+                    nodeOperations.startEVEDBConnection();
+                    nodeOperations.openEVEDBConnection();
+                    nodeOperations.setEVEDBQuery(nodeOperations.premadeQuery_getAdjacentSolarSystems(this.ID));
+                    this.neighborNodes = new List<Node>();
+                    while (nodeOperations.eveDBQueryRead())
+                    {
+                        int id = (int)nodeOperations.eveDBReader[0];
+                        if (QueriesCache.systems.ContainsKey(id))
+                        {
+                            this.neighborNodes.Add(QueriesCache.systems[id]);
+                        }
+                        else
+                        {
+                            this.neighborNodes.Add(new Node(id));
+
+                        }
+                    }
+                    nodeOperations.eveDBQueryClose();
+                    nodeOperations.closeEVEDBConnection();
+                }
             }
             return this.neighborNodes;
+        }
+
+        public void resetNeighborNodes()
+        {
+            this.neighborNodes = null;
         }
 
         private double hFunction(Node node, Node goal)
@@ -97,9 +162,9 @@ namespace EVERouteFinder.Classes
             //but factors of up to 15-17 are quite accurate (maybe around 85-90% accuracy
             //and only miss by 1-2 jumps) but quite faster. If calculation times for the whole
             //algorythm are a problem accuracy can be lowered for the sake of execution times (since
-            //the only 100% accurate is factor=0) route finding times for long routes (60+ nodes) are halved with factor=17 
+            //the only 100% accurate is factor=1) route finding times for long routes (60+ nodes) are halved with factor=17 
             //from factor=0 usually long routes get higher accuracy from high factors while shorter routes
-            //benefit from lower or 0 factor (and their execution time is pretty low anyway
+            //benefit from lower or 1 factor (and their execution time is pretty low anyway
         }
 
         private double hFunctionNoFactor(Node node, Node goal)
