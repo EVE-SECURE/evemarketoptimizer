@@ -60,7 +60,7 @@ namespace EVERouteFinder.Classes
         public Node camefrom { get; set; }
         public Node goal { get; set; }
         public bool notnull = false;
-        public bool nofactor = false;
+        public bool nofactor;
         [XmlArray()]
         public List<Node> neighborNodes = null;
 
@@ -71,6 +71,19 @@ namespace EVERouteFinder.Classes
             {
                 this.neighborNodes.Add(new Node(n1, true));
             }
+        }
+
+        public List<Node> getNeighborNodes(Node n)
+        {
+            if (this.neighborNodes == null)
+            {
+                fillNeighborList(n);
+            }
+            else if (this.neighborNodes.Count() == 0)
+            {
+                fillNeighborList(n);
+            }
+            return this.neighborNodes;
         }
 
         private double hFunction(Node node, Node goal)
@@ -101,15 +114,12 @@ namespace EVERouteFinder.Classes
             maxDist = minDist * 324.09;
             double distance = double.MaxValue;
             distance = Math.Sqrt(Math.Pow(node.X - goal.X, 2) + Math.Pow(node.Y - goal.Y, 2) + Math.Pow(node.Z - goal.Z, 2));
-            return 0 * distance / maxDist;
+            return 1 * distance / maxDist;
         }
         
         private double f_scoreF()
         {
-            if (this.if_score == 0)
-            {
-                this.if_score = g_score + h_scoreF();
-            }
+            this.if_score = g_score + h_scoreF();
             return this.if_score;
         }
 
