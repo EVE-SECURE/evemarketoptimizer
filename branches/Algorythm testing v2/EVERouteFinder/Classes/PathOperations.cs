@@ -41,12 +41,14 @@ namespace EVERouteFinder.Classes
         public List<Node> avoidanceList { get; set; }
         List<Node> closedset;
         List<Node> openset;
+        public List<Node> completeNodeList;
         public bool nofactor;
         //private DateTime timestamp;
 
         public List<Node> Evaluate()
         {
             //timestamp = DateTime.Now;
+            //setFactorToNodes();
             this.start.goal = this.goal;
             this.openset.Add(this.start);
             //nodeOset(this, new nodeInOpenSetEventArgs(this.start, true));
@@ -57,8 +59,14 @@ namespace EVERouteFinder.Classes
             while (this.openset.Count > 0)
             {
                 Node x = this.getLowestFscoreNode(openset);
+                x.nofactor = this.nofactor;
                 if (x.ID == this.goal.ID)
                 {
+                    if (x.camefrom == null)
+                    {
+                        int a = 0;
+                        a += 1;
+                    }
                     return this.ReconstructPath(x.camefrom, x);
                 }
                 else
@@ -72,7 +80,7 @@ namespace EVERouteFinder.Classes
                     //    loop(n, n1);
                     //}
                     //);
-                    foreach (Node y in x.getNeighborNodes())
+                    foreach (Node y in x.getNeighborNodes(searchbyID(completeNodeList, x.ID)))
                     {
                         //if (this.searchbyID(avoidanceList, y.ID) == null)
                         //{
@@ -89,6 +97,7 @@ namespace EVERouteFinder.Classes
                         {
                             if (this.searchbyID(this.openset, y.ID) == null)
                             {
+                                y.camefrom = x;
                                 this.openset.Add(y);
                                 //nodeOset(this, new nodeInOpenSetEventArgs(y, true));
                                 tentative_is_better = true;
@@ -104,7 +113,6 @@ namespace EVERouteFinder.Classes
                         }
                         if (tentative_is_better)
                         {
-                            y.camefrom = x;
                             y.g_score = tentative_g_score;
                         }
                         //}
@@ -126,6 +134,17 @@ namespace EVERouteFinder.Classes
 //          return nodeList.Find(delegate(Node n){return n.ID == id;});
         }
 
+        private void setFactorToNodes()
+        {
+            foreach (Node n in completeNodeList)
+            {
+                n.nofactor = this.nofactor;
+                foreach (Node n1 in n.neighborNodes)
+                {
+                    n1.nofactor = this.nofactor;
+                }
+            }
+        }
         //double heuristicFunction(Node from, Node to)
         //{
         //    double a = 0;
@@ -151,15 +170,20 @@ namespace EVERouteFinder.Classes
         {
             //TimeSpan t = timestamp.Subtract(DateTime.Now);
             List<Node> Path = new List<Node>();
-            if (cameFrom.camefrom != null)
+            //if (cameFrom == null)
+            //{
+            //    Path.Add(currentNode);
+            //    return Path;
+            //}
+            if (cameFrom.camefrom == null)
             {
-                Path = ReconstructPath(cameFrom.camefrom, cameFrom);
+                Path.Add(cameFrom);
                 Path.Add(currentNode);
                 return Path;
             }
             else
             {
-                Path.Add(cameFrom);
+                Path = ReconstructPath(cameFrom.camefrom, cameFrom);
                 Path.Add(currentNode);
                 return Path;
             }

@@ -21,53 +21,80 @@ namespace EVERouteFinder
             InitializeComponent();
         }
 
-
-        private List<Node> getSolarSystems()
-        {
-            EVEDBoperations nodeOperations = new EVEDBoperations();
-            nodeOperations.startEVEDBConnection();
-            nodeOperations.openEVEDBConnection();
-            nodeOperations.setEVEDBQuery(nodeOperations.premadeQuery_getSolarSystemsList());
-            List<Node> solarSystems = new List<Node>();
-            while (nodeOperations.eveDBQueryRead())
-            {
-                solarSystems.Add(new Node((int)nodeOperations.eveDBReader[0]));
-            }
-            nodeOperations.eveDBQueryClose();
-            nodeOperations.closeEVEDBConnection();
-            return solarSystems;
-        }
+        //private static List<Node> getSolarSystems()
+        //{
+        //    List<Node> nodelist = new List<Node>();
+        //    XmlOperations xo = new XmlOperations();
+        //    nodelist = (List<Node>) xo.LoadFromStream(initializeMemStream(), nodelist.GetType().ToString());
+        //    //SetText(nodelist[0].neighborNodes[0].f_score + "\r\n", 1);
+        //    return nodelist;
+        //}
 
         private void loopNodes()
         {
-            List<Node> myList = getSolarSystems();
-            ParallelOptions po = new ParallelOptions();
-            po.MaxDegreeOfParallelism = Environment.ProcessorCount;
-            //workload is around 55% program 35% database. probably could be highly optimized by saving all queried nodes to a single structure and working from there
-            Parallel.ForEach(myList, po, n =>
+            Thread[] threadpool = new Thread[Environment.ProcessorCount];
+            //Thread[] threadpool = new Thread[1];
+            for (int i = 0; i < threadpool.Count(); i++)
             {
-                List<Node> mylist2 = getSolarSystems();
-                foreach (Node n1 in mylist2)
-                {
-                    loop(n, n1);
-                }
+                threadpool[i] = new Thread( () => Loop(i));
+                threadpool[i].Start();
+                Thread.Sleep(300);
             }
-            );
-
-            this.textBoxResult.Text = Settings.SEVEDBSettings.factor.ToString();
         }
 
-        private void loop(Node n, Node n1)
+        private void Loop(int i)
+        {
+            List<Node> nodelist = new List<Node>();
+            XmlOperations xo = new XmlOperations();
+            MemoryStream ms;
+            ms = xo.GetStreamFromFile(Path.Combine(Directory.GetCurrentDirectory(), "nodeList.xml"));
+            nodelist = (List<Node>)xo.LoadFromStream(ms, nodelist.GetType().ToString());
+            for (int j = 1; j < nodelist.Count + 1; j++)
+            {
+                if (j % (i + 1) == 0)
+                {
+                    foreach (Node n in nodelist)
+                    {
+                        loop(nodelist[j - 1], n, ms);
+                    }
+                }
+            }
+
+
+        }
+        //private void loopNodes()
+        //{
+        //    List<Node> myList = getSolarSystems();
+        //    ParallelOptions po = new ParallelOptions();
+        //    po.MaxDegreeOfParallelism = Environment.ProcessorCount;
+        //    Parallel.ForEach(myList, po, n =>
+        //    {
+        //        List<Node> mylist2 = getSolarSystems();
+        //        foreach (Node n1 in mylist2)
+        //        {
+        //            loop(n, n1);
+        //        }
+        //    }
+        //    );
+
+        //    this.textBoxResult.Text = Settings.SEVEDBSettings.factor.ToString();
+        //}
+
+        private void loop(Node n, Node n1, MemoryStream ms)
         {
             if (n.ID != n1.ID)
             {
-                int tid = Thread.CurrentThread.ManagedThreadId;
                 n.nofactor = n1.nofactor = false;
                 PathOperations pop = new PathOperations(n, n1);
                 pop.nofactor = false;
                 pop.start.nofactor = false;
                 pop.goal.nofactor = false;
                 List<Node> route = new List<Node>();
+                List<Node> nodelist = new List<Node>();
+                XmlOperations xo = new XmlOperations();
+                nodelist = (List<Node>)xo.LoadFromStream(ms, nodelist.GetType().ToString());
+
+                pop.completeNodeList = nodelist;
 
                 route = pop.Evaluate();
                 string systems = "";
@@ -77,14 +104,17 @@ namespace EVERouteFinder
                     systems += "System: " + " " + n2.Name + " " + n2.Security.ToString() + " " + n2.Region.ToString() + " " + "\r\n"; //n2.f_score.ToString() +
                     i++;
                 }
-                n.resetNeighborNodes();
-                n1.resetNeighborNodes();
+                n.nofactor = n1.nofactor = true;
                 pop = new PathOperations(n, n1);
                 pop.nofactor = true;
                 pop.start.nofactor = true;
                 pop.goal.nofactor = true;
                 route = new List<Node>();
+                nodelist = new List<Node>();
+                xo = new XmlOperations();
+                nodelist = (List<Node>)xo.LoadFromStream(ms, nodelist.GetType().ToString());
 
+                pop.completeNodeList = nodelist;
                 route = pop.Evaluate();
                 string systems1 = "";
                 int a = 0;
@@ -98,25 +128,18 @@ namespace EVERouteFinder
                     SetText(n.Name + " " + n1.Name + " " + "Not qualified " + a.ToString() + ", " + (i - a).ToString() + "\r\n", 1);
                     if (i - a > 0)
                     {
-                        if (i - a < 5)
-                        {
-                            Settings.SEVEDBSettings.factor -= (i - a) * Settings.SEVEDBSettings.factor / 100;
-                        }
-                        else if (i - a < 10)
-                        {
-                            Settings.SEVEDBSettings.factor -= 1.2 * (i - a) * Settings.SEVEDBSettings.factor / 100;
-                        }
-                        else
-                        {
-                            Settings.SEVEDBSettings.factor -= 2 * (i - a) * Settings.SEVEDBSettings.factor / 100;
-                        }
-                        Settings.SEVEDBSettings.addAvg();
                         SetText(Settings.SEVEDBSettings.factor.ToString() + "// Avg:" + Settings.SEVEDBSettings.avgFactor.ToString() + " /// Deviation: " + (i - a).ToString() + " // on " + DateTime.Now.ToLongTimeString() + "\r\n", 2);
+                        SetText((i - a).ToString(), 3);
+                    }
+                    if (a - i > 0)
+                    {
+                        int b = 0;
+                        b += 1;
                     }
                 }
                 else
                 {
-                    SetText(n.Name + " " + n1.Name + " " + "Qualified " + a.ToString() + "\r\n", 0);
+                    SetText(n.Name + " " + n1.Name + " " + "Qualified " + i.ToString() + "\r\n", 0);
                 }
             }
         }
@@ -135,12 +158,20 @@ namespace EVERouteFinder
                     case 0:
                         this.textBoxResult.AppendText(text);
                         this.textBoxResult.Focus();
-                        if ((this.textBoxResult.Lines.Count() + this.textBox2.Lines.Count()) % 10 == 0)
+                        double fact = 5;
+                        if (errorrate < 0.1)
                         {
-                            Settings.SEVEDBSettings.factor += Settings.SEVEDBSettings.factor / 1000;
+                            Settings.SEVEDBSettings.factor += fact * Settings.SEVEDBSettings.factor / 5000;
                             Settings.SEVEDBSettings.addAvg();
                             this.textBox1.AppendText(Settings.SEVEDBSettings.factor.ToString() + "// Avg:" + Settings.SEVEDBSettings.avgFactor.ToString() + "\r\n");
                         }
+                        else
+                        {
+                            Settings.SEVEDBSettings.factor += Settings.SEVEDBSettings.factor / 5000;
+                            Settings.SEVEDBSettings.addAvg();
+                            this.textBox1.AppendText(Settings.SEVEDBSettings.factor.ToString() + "// Avg:" + Settings.SEVEDBSettings.avgFactor.ToString() + "\r\n");
+                        }
+                        
                         break;
                     case 1:
                         this.textBox2.AppendText(text);
@@ -150,13 +181,34 @@ namespace EVERouteFinder
                         this.textBox1.AppendText(text);
                         this.textBox1.Focus();
                         break;
+                    case 3:
+                        int a = Convert.ToInt32(text);
+                        double errRate;
+                        errors++;
+                        this.textBoxCentre2.Text = (errors).ToString();
+                        Settings.SEVEDBSettings.factor -= a * Settings.SEVEDBSettings.factor / 100;
+                        Settings.SEVEDBSettings.addAvg();
+                        errRate = errors / ((double)(Convert.ToInt32(this.textBoxLeft.Text) + Convert.ToInt32(this.textBoxCentre.Text)));
+                        this.errorrate = errRate;
+                        this.textBoxRight2.Text = errRate.ToString();
+                        break;
                 }
             }
         }
+        int errors = 0;
+        double errorrate = 0;
+        //private List<Node> getList(int thread)
+        //{
+            
+        //}
+
+        delegate void StartLoop(Node n, Node n1);
 
         delegate void SetTextCallback(string text, int thread);
 
         delegate void StartDoingWork();
+
+        delegate void StartDoingWorkInt(int i);
 
         private void searchFactor()
         {
@@ -212,21 +264,28 @@ namespace EVERouteFinder
 
         private void button1_Click_1(object sender, EventArgs e)
         {
-            //inputMarketDatabaseDump();
-            //searchFactor();
-            List<Node> nodelist = getSolarSystems();
-            foreach (Node n in nodelist)
-            {
-                n.getNeighborNodes();
-            }
-            XmlOperations xo = new XmlOperations();
-            xo.Save(nodelist, Path.Combine(Directory.GetCurrentDirectory(), "nodeList.xml"), nodelist.GetType().ToString());
-
+            this.button1.Text = DateTime.Now.ToString();
+            searchFactor();
         }
 
         private void MainMenu_Load(object sender, EventArgs e)
         {
             Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
+        }
+
+        private void textBoxResult_TextChanged(object sender, EventArgs e)
+        {
+            this.textBoxLeft.Text = textBoxResult.Lines.Count().ToString();
+        }
+
+        private void textBox2_TextChanged(object sender, EventArgs e)
+        {
+            this.textBoxCentre.Text = textBox2.Lines.Count().ToString();
+        }
+
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+            this.textBoxRight.Text = textBox1.Lines.Count().ToString();
         }
 
 

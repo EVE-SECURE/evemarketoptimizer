@@ -17,7 +17,7 @@ namespace EVERouteFinder.Classes
 
         public XmlOperations()
         {
-            this.retrysleeptime = 1000;
+            this.retrysleeptime = 1500;
         }
 
         public XmlOperations(int RetrySleepTime)
@@ -96,6 +96,45 @@ namespace EVERouteFinder.Classes
             }
         }
 
+        public Object LoadFromStream(MemoryStream mems, string type)
+        {
+            mems.Position = 0;
+            XmlSerializer xs = new XmlSerializer(Type.GetType(type));
+            Object objectToReturn = xs.Deserialize(mems);
+            return objectToReturn;
+        }
+
+        public MemoryStream GetStreamFromFile(string path)
+        {
+            try
+            {
+                if (CheckFile(path, FileMode.Open, FileAccess.Read))
+                {
+                    FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read);
+                    int lenght = Convert.ToInt32(fs.Length);
+                    MemoryStream mems = new MemoryStream(lenght);
+                    BinaryReader br = new BinaryReader(fs);
+                    byte[] byteBuffer = br.ReadBytes(lenght);
+                    mems.Write(byteBuffer, 0, lenght);
+                    mems.Position = 0;
+                    return mems;
+                }
+                else
+                {
+                    throw new IOException("File " + path + " is locked by another user and can't be read.");
+                }
+            }
+            catch (IOException ex1)
+            {
+                throw new IOException("IO Exception thrown at XmlOperations.Load, possibly due to the path to file being wrong or the file being locked. Exception message: " + ex1.Message);
+            }
+            catch (Exception ex2)
+            {
+                throw new Exception("Exception thrown at XmlOperations.Load, possibly due to a deserialization issue, check the Xml File. Exception message: " + ex2.Message);
+            }
+
+        }
+
         /* Checks that the file is available for the required file
          * access, retries 10 times waiting "retrysleeptime" miliseconds
          * for each try, and returns the availability when determined.*/
@@ -103,7 +142,7 @@ namespace EVERouteFinder.Classes
         {
             bool available = false;
             FileStream fs = null;
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < 30; i++)
             {
                 try
                 {
@@ -114,7 +153,8 @@ namespace EVERouteFinder.Classes
                 }
                 catch (Exception ex)
                 {
-                    Thread.Sleep(this.retrysleeptime);
+                    Random rn = new Random();
+                    Thread.Sleep(this.retrysleeptime + rn.Next(300));
                 }
             }
             return available;
