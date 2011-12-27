@@ -27,10 +27,10 @@ namespace EVERouteFinder.Classes
             this.Region = n.Region;
             this.Security = n.Security;
             this.g_score = n.g_score;
-            if (!isNeighbor)
-            {
-                fillNeighborList(n);
-            }
+            //if (!isNeighbor)
+            //{
+            //    fillNeighborList(n);
+            //}
         }
         
         [XmlAttribute()]
@@ -64,39 +64,39 @@ namespace EVERouteFinder.Classes
         [XmlArray()]
         public List<Node> neighborNodes = null;
 
-        private void fillNeighborList(Node n)
-        {
-            this.neighborNodes = new List<Node>();
-            foreach (Node n1 in n.neighborNodes)
-            {
-                this.neighborNodes.Add(new Node(n1, true));
-            }
-        }
+        //private void fillNeighborList(Node n)
+        //{
+        //    this.neighborNodes = new List<Node>();
+        //    foreach (Node n1 in n.neighborNodes)
+        //    {
+        //        this.neighborNodes.Add(new Node(n1, true));
+        //    }
+        //}
 
-        public List<Node> getNeighborNodes(Node n)
-        {
-            if (this.neighborNodes == null)
-            {
-                fillNeighborList(n);
-            }
-            else if (this.neighborNodes.Count() == 0)
-            {
-                fillNeighborList(n);
-            }
-            return this.neighborNodes;
-        }
+        //public List<Node> getNeighborNodes(Node n)
+        //{
+        //    if (this.neighborNodes == null)
+        //    {
+        //        fillNeighborList(n);
+        //    }
+        //    else if (this.neighborNodes.Count() == 0)
+        //    {
+        //        fillNeighborList(n);
+        //    }
+        //    return this.neighborNodes;
+        //}
 
         private double hFunction(Node node, Node goal)
         {
             //1.0637 E+15 / 324.09 = Max distance between nodes
             double minDist;
             double maxDist;
-            double.TryParse("1063700000000000", out minDist);
+            minDist= double.Parse("1063700000000000");
             maxDist = minDist * 324.09;
-            double distance = double.MaxValue;
+            double distance;
             distance = Math.Sqrt(Math.Pow(node.X - goal.X, 2) + Math.Pow(node.Y - goal.Y, 2) + Math.Pow(node.Z - goal.Z, 2));
             return Settings.SEVEDBSettings.factor * distance / maxDist; 
-            //last stable factor found at 3,89000000000012 (more than 95% accuracy) 
+            //last stable factor found at 7 (more than 95% accuracy) 
             //but factors of up to 15-17 are quite accurate (maybe around 85-90% accuracy
             //and only miss by 1-2 jumps) but quite faster. If calculation times for the whole
             //algorythm are a problem accuracy can be lowered for the sake of execution times (since
@@ -108,13 +108,14 @@ namespace EVERouteFinder.Classes
         private double hFunctionNoFactor(Node node, Node goal)
         {
             //1.0637 E+15 / 324.09 = Max distance between nodes
-            double minDist;
-            double maxDist;
-            double.TryParse("1063700000000000", out minDist);
-            maxDist = minDist * 324.09;
-            double distance = double.MaxValue;
-            distance = Math.Sqrt(Math.Pow(node.X - goal.X, 2) + Math.Pow(node.Y - goal.Y, 2) + Math.Pow(node.Z - goal.Z, 2));
-            return 1 * distance / maxDist;
+            //double minDist;
+            //double maxDist;
+            //double.TryParse("1063700000000000", out minDist);
+            //maxDist = minDist * 324.09;
+            //double distance = double.MaxValue;
+            //distance = Math.Sqrt(Math.Pow(node.X - goal.X, 2) + Math.Pow(node.Y - goal.Y, 2) + Math.Pow(node.Z - goal.Z, 2));
+            //return 1 * distance / maxDist;
+            return 0;
         }
         
         private double f_scoreF()
@@ -127,15 +128,15 @@ namespace EVERouteFinder.Classes
         private double h_scoreF()
         {
             double result = 0;
-            if (goal != null && this.nofactor == false)
-            {
+            //if (goal != null && this.nofactor == false)
+            //{
                 result = hFunction(this, goal);
-            }
-            else if (goal != null && this.nofactor == true)
-            {
-                result = hFunctionNoFactor(this, goal);
-            }
-            return result;
+            //}
+            //else if (goal != null && this.nofactor == true)
+            //{
+            //    result = hFunctionNoFactor(this, goal);
+            //}
+                return result;
         }
 
     }

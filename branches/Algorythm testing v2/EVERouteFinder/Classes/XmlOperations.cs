@@ -36,14 +36,16 @@ namespace EVERouteFinder.Classes
         public bool Save(Object objectToSerialize, string path, string type)
         {
             FileStream fs = null;
-            XmlSerializer xs = null;
+            if (this.Serializer == null)
+            {
+                this.Serializer = new XmlSerializer(Type.GetType(type));
+            }
             try
             {
                 if (CheckFile(path, FileMode.OpenOrCreate, FileAccess.Write))
                 {
                     fs = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None);
-                    xs = new XmlSerializer(Type.GetType(type));
-                    xs.Serialize(fs, objectToSerialize);
+                    Serializer.Serialize(fs, objectToSerialize);
                     fs.Close();
                     return true;
                 }
@@ -69,14 +71,16 @@ namespace EVERouteFinder.Classes
         public Object Load(string path, string type)
         {
             FileStream fs = null;
-            XmlSerializer xs = null;
+            if (this.Serializer == null)
+            {
+                this.Serializer = new XmlSerializer(Type.GetType(type));
+            } 
             try
             {
                 if (CheckFile(path, FileMode.Open, FileAccess.Read))
                 {
                     fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
-                    xs = new XmlSerializer(Type.GetType(type));
-                    Object objectToReturn = xs.Deserialize(fs);
+                    Object objectToReturn = this.Serializer.Deserialize(fs);
                     fs.Close();
                     return objectToReturn;
                 }
@@ -96,11 +100,16 @@ namespace EVERouteFinder.Classes
             }
         }
 
+        public XmlSerializer Serializer;
+
         public Object LoadFromStream(MemoryStream mems, string type)
         {
             mems.Position = 0;
-            XmlSerializer xs = new XmlSerializer(Type.GetType(type));
-            Object objectToReturn = xs.Deserialize(mems);
+            if (this.Serializer == null)
+            {
+                this.Serializer = new XmlSerializer(Type.GetType(type));
+            }
+            Object objectToReturn = this.Serializer.Deserialize(mems);
             return objectToReturn;
         }
 
