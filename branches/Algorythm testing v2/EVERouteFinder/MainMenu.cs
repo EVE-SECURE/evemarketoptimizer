@@ -30,6 +30,10 @@ namespace EVERouteFinder
         //    return nodelist;
         //}
 
+        private Thread[] ThreadPool;
+
+
+
         private void loopNodes()
         {
             Thread[] threadpool = new Thread[Environment.ProcessorCount];
@@ -40,6 +44,7 @@ namespace EVERouteFinder
                 threadpool[i].Start();
                 Thread.Sleep(300);
             }
+            this.ThreadPool = threadpool;
         }
 
         private void Loop(int i)
@@ -49,15 +54,23 @@ namespace EVERouteFinder
             MemoryStream ms;
             ms = xo.GetStreamFromFile(Path.Combine(Directory.GetCurrentDirectory(), "nodeList.xml"));
             nodelist = (List<Node>)xo.LoadFromStream(ms, nodelist.GetType().ToString());
-            for (int j = 1; j < nodelist.Count + 1; j++)
+            int amount = nodelist.Count;
+            while (!(amount % Environment.ProcessorCount == 0))
             {
-                if (j % (i + 1) == 0)
+                amount++;
+            }
+            int segment = amount / Environment.ProcessorCount;
+            if (i == Environment.ProcessorCount - 1)
+            {
+                segment = segment - (segment * Environment.ProcessorCount - nodelist.Count);
+            }
+            for (int j = i * segment; j < (i+1) * segment; j++)
+            {
+                foreach (Node n in nodelist)
                 {
-                    foreach (Node n in nodelist)
-                    {
-                        loop(nodelist[j - 1], n, ms);
-                    }
+                    loop(nodelist[j], n, ms, xo);
                 }
+
             }
 
 
@@ -80,7 +93,7 @@ namespace EVERouteFinder
         //    this.textBoxResult.Text = Settings.SEVEDBSettings.factor.ToString();
         //}
 
-        private void loop(Node n, Node n1, MemoryStream ms)
+        private void loop(Node n, Node n1, MemoryStream ms, XmlOperations xo)
         {
             if (n.ID != n1.ID)
             {
@@ -91,7 +104,6 @@ namespace EVERouteFinder
                 pop.goal.nofactor = false;
                 List<Node> route = new List<Node>();
                 List<Node> nodelist = new List<Node>();
-                XmlOperations xo = new XmlOperations();
                 nodelist = (List<Node>)xo.LoadFromStream(ms, nodelist.GetType().ToString());
 
                 pop.completeNodeList = nodelist;
@@ -101,46 +113,46 @@ namespace EVERouteFinder
                 int i = 0;
                 foreach (Node n2 in route)
                 {
-                    systems += "System: " + " " + n2.Name + " " + n2.Security.ToString() + " " + n2.Region.ToString() + " " + "\r\n"; //n2.f_score.ToString() +
+                    //systems += "System: " + " " + n2.Name + " " + n2.Security.ToString() + " " + n2.Region.ToString() + " " + "\r\n"; //n2.f_score.ToString() +
                     i++;
                 }
-                n.nofactor = n1.nofactor = true;
-                pop = new PathOperations(n, n1);
-                pop.nofactor = true;
-                pop.start.nofactor = true;
-                pop.goal.nofactor = true;
-                route = new List<Node>();
-                nodelist = new List<Node>();
-                xo = new XmlOperations();
-                nodelist = (List<Node>)xo.LoadFromStream(ms, nodelist.GetType().ToString());
+                //n.nofactor = n1.nofactor = true;
+                //pop = new PathOperations(n, n1);
+                //pop.nofactor = true;
+                //pop.start.nofactor = true;
+                //pop.goal.nofactor = true;
+                //route = new List<Node>();
+                //nodelist = new List<Node>();
+                //xo = new XmlOperations();
+                //nodelist = (List<Node>)xo.LoadFromStream(ms, nodelist.GetType().ToString());
 
-                pop.completeNodeList = nodelist;
-                route = pop.Evaluate();
-                string systems1 = "";
-                int a = 0;
-                foreach (Node n2 in route)
-                {
-                    systems1 += "System: " + " " + n2.Name + " " + n2.Security.ToString() + " " + n2.Region.ToString() + " " + "\r\n"; //n2.f_score.ToString() +
-                    a++;
-                }
-                if (systems != systems1)
-                {
-                    SetText(n.Name + " " + n1.Name + " " + "Not qualified " + a.ToString() + ", " + (i - a).ToString() + "\r\n", 1);
-                    if (i - a > 0)
-                    {
-                        SetText(Settings.SEVEDBSettings.factor.ToString() + "// Avg:" + Settings.SEVEDBSettings.avgFactor.ToString() + " /// Deviation: " + (i - a).ToString() + " // on " + DateTime.Now.ToLongTimeString() + "\r\n", 2);
-                        SetText((i - a).ToString(), 3);
-                    }
-                    if (a - i > 0)
-                    {
-                        int b = 0;
-                        b += 1;
-                    }
-                }
-                else
-                {
-                    SetText(n.Name + " " + n1.Name + " " + "Qualified " + i.ToString() + "\r\n", 0);
-                }
+                //pop.completeNodeList = nodelist;
+                //route = pop.Evaluate();
+                //string systems1 = "";
+                //int a = 0;
+                //foreach (Node n2 in route)
+                //{
+                //    systems1 += "System: " + " " + n2.Name + " " + n2.Security.ToString() + " " + n2.Region.ToString() + " " + "\r\n"; //n2.f_score.ToString() +
+                //    a++;
+                //}
+                //if (systems != systems1)
+                //{
+                //    SetText(n.Name + " " + n1.Name + " " + "Not qualified " + a.ToString() + ", " + (i - a).ToString() + "\r\n", 1);
+                //    if (i - a > 0)
+                //    {
+                //        SetText(Settings.SEVEDBSettings.factor.ToString() + "// Avg:" + Settings.SEVEDBSettings.avgFactor.ToString() + " /// Deviation: " + (i - a).ToString() + " // on " + DateTime.Now.ToLongTimeString() + "\r\n", 2);
+                //        SetText((i - a).ToString(), 3);
+                //    }
+                //    if (a - i > 0)
+                //    {
+                //        int b = 0;
+                //        b += 1;
+                //    }
+                //}
+                //else
+                //{
+                SetText(n.Name + " " + n1.Name + " " + "Qualified " + i.ToString() + "\r\n", 0);
+                //}
             }
         }
 
@@ -159,18 +171,18 @@ namespace EVERouteFinder
                         this.textBoxResult.AppendText(text);
                         this.textBoxResult.Focus();
                         double fact = 5;
-                        if (errorrate < 0.1)
-                        {
-                            Settings.SEVEDBSettings.factor += fact * Settings.SEVEDBSettings.factor / 5000;
-                            Settings.SEVEDBSettings.addAvg();
-                            this.textBox1.AppendText(Settings.SEVEDBSettings.factor.ToString() + "// Avg:" + Settings.SEVEDBSettings.avgFactor.ToString() + "\r\n");
-                        }
-                        else
-                        {
-                            Settings.SEVEDBSettings.factor += Settings.SEVEDBSettings.factor / 5000;
-                            Settings.SEVEDBSettings.addAvg();
-                            this.textBox1.AppendText(Settings.SEVEDBSettings.factor.ToString() + "// Avg:" + Settings.SEVEDBSettings.avgFactor.ToString() + "\r\n");
-                        }
+                        //if (errorrate < 0.05)
+                        //{
+                        //    Settings.SEVEDBSettings.factor += Settings.SEVEDBSettings.factor / 10000;
+                        //    Settings.SEVEDBSettings.addAvg();
+                        //    this.textBox1.AppendText(Settings.SEVEDBSettings.factor.ToString() + "// Avg:" + Settings.SEVEDBSettings.avgFactor.ToString() + "\r\n");
+                        //}
+                        //else
+                        //{
+                        //    //Settings.SEVEDBSettings.factor += Settings.SEVEDBSettings.factor / 10000;
+                        //    Settings.SEVEDBSettings.addAvg();
+                        //    this.textBox1.AppendText(Settings.SEVEDBSettings.factor.ToString() + "// Avg:" + Settings.SEVEDBSettings.avgFactor.ToString() + "\r\n");
+                        //}
                         
                         break;
                     case 1:
@@ -186,7 +198,7 @@ namespace EVERouteFinder
                         double errRate;
                         errors++;
                         this.textBoxCentre2.Text = (errors).ToString();
-                        Settings.SEVEDBSettings.factor -= a * Settings.SEVEDBSettings.factor / 100;
+                        Settings.SEVEDBSettings.factor -= a*Settings.SEVEDBSettings.factor / 10000;
                         Settings.SEVEDBSettings.addAvg();
                         errRate = errors / ((double)(Convert.ToInt32(this.textBoxLeft.Text) + Convert.ToInt32(this.textBoxCentre.Text)));
                         this.errorrate = errRate;
@@ -215,7 +227,6 @@ namespace EVERouteFinder
             StartDoingWork s = new StartDoingWork(loopNodes);
             Thread myNewThread = new Thread(s.Invoke);
             myNewThread.Start();
-            this.button1.Enabled = false;
         }
 
         private void inputMarketDatabaseDump()
@@ -262,10 +273,32 @@ namespace EVERouteFinder
             return s;
         }
 
+        private bool isrunning = false;
+
         private void button1_Click_1(object sender, EventArgs e)
         {
-            this.button1.Text = DateTime.Now.ToString();
-            searchFactor();
+            if (this.ThreadPool != null && isrunning == true)
+            {
+                foreach (Thread t in ThreadPool)
+                {
+                    t.Suspend();
+                }
+                this.isrunning = false;
+            }
+            else if (this.ThreadPool != null && isrunning == false)
+            {
+                foreach (Thread t in ThreadPool)
+                {
+                    t.Resume();
+                }
+                this.isrunning = true;
+            }
+            else
+            {
+                searchFactor();
+                this.isrunning = true;
+                this.button1.Text = DateTime.Now.ToString();
+            }
         }
 
         private void MainMenu_Load(object sender, EventArgs e)

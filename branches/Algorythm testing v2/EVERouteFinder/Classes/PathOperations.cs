@@ -62,11 +62,6 @@ namespace EVERouteFinder.Classes
                 x.nofactor = this.nofactor;
                 if (x.ID == this.goal.ID)
                 {
-                    if (x.camefrom == null)
-                    {
-                        int a = 0;
-                        a += 1;
-                    }
                     return this.ReconstructPath(x.camefrom, x);
                 }
                 else
@@ -80,7 +75,7 @@ namespace EVERouteFinder.Classes
                     //    loop(n, n1);
                     //}
                     //);
-                    foreach (Node y in x.getNeighborNodes(searchbyID(completeNodeList, x.ID)))
+                    foreach (Node y in searchbyID(completeNodeList, x.ID).neighborNodes)
                     {
                         //if (this.searchbyID(avoidanceList, y.ID) == null)
                         //{
@@ -189,39 +184,39 @@ namespace EVERouteFinder.Classes
             }
         }
 
-        public event nodeInOpenSet nodeOset;
+        //public event nodeInOpenSet nodeOset;
 
-        public event nodeInClosedSet nodeCset;
+        //public event nodeInClosedSet nodeCset;
     }
 
 
-    public delegate void nodeInOpenSet(object sender, nodeInOpenSetEventArgs e);
-    public delegate void nodeInClosedSet(object sender, nodeInClosedSetEventArgs e);
+    //public delegate void nodeInOpenSet(object sender, nodeInOpenSetEventArgs e);
+    //public delegate void nodeInClosedSet(object sender, nodeInClosedSetEventArgs e);
     
-    public class nodeInOpenSetEventArgs : EventArgs
-    {
-        public nodeInOpenSetEventArgs(Node node, bool isadded)
-        {
-            this.opensetNode = node;
-            this.isAdded = isadded;
-            this.eventTime = DateTime.Now;
-        }
-        public Node opensetNode { get; set; }
-        public bool isAdded { get; set; }
-        public DateTime eventTime { get; set; }
-    }
+    //public class nodeInOpenSetEventArgs : EventArgs
+    //{
+    //    public nodeInOpenSetEventArgs(Node node, bool isadded)
+    //    {
+    //        this.opensetNode = node;
+    //        this.isAdded = isadded;
+    //        this.eventTime = DateTime.Now;
+    //    }
+    //    public Node opensetNode { get; set; }
+    //    public bool isAdded { get; set; }
+    //    public DateTime eventTime { get; set; }
+    //}
 
-    public class nodeInClosedSetEventArgs : EventArgs
-    {
-        public nodeInClosedSetEventArgs(Node node, bool isadded)
-        {
-            this.closedsetNode = node;
-            this.isAdded = isadded;
-            this.eventTime = DateTime.Now;
-        }
-        public Node closedsetNode { get; set; }
-        public bool isAdded { get; set; }
-        public DateTime eventTime { get; set; }
-    }
+    //public class nodeInClosedSetEventArgs : EventArgs
+    //{
+    //    public nodeInClosedSetEventArgs(Node node, bool isadded)
+    //    {
+    //        this.closedsetNode = node;
+    //        this.isAdded = isadded;
+    //        this.eventTime = DateTime.Now;
+    //    }
+    //    public Node closedsetNode { get; set; }
+    //    public bool isAdded { get; set; }
+    //    public DateTime eventTime { get; set; }
+    //}
 
 }
