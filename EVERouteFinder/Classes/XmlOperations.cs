@@ -6,6 +6,8 @@ using System.Xml;
 using System.Xml.Serialization;
 using System.IO;
 using System.Threading;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace EVERouteFinder.Classes
 {
@@ -14,6 +16,7 @@ namespace EVERouteFinder.Classes
     class XmlOperations
     {
         private int retrysleeptime;
+        public XmlSerializer Serializer;
 
         public XmlOperations()
         {
@@ -42,7 +45,7 @@ namespace EVERouteFinder.Classes
             }
             try
             {
-                if (CheckFile(path, FileMode.OpenOrCreate, FileAccess.Write))
+                if (CheckFile(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Read))
                 {
                     fs = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.None);
                     Serializer.Serialize(fs, objectToSerialize);
@@ -77,7 +80,7 @@ namespace EVERouteFinder.Classes
             } 
             try
             {
-                if (CheckFile(path, FileMode.Open, FileAccess.Read))
+                if (CheckFile(path, FileMode.Open, FileAccess.Read, FileShare.Read))
                 {
                     fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
                     Object objectToReturn = this.Serializer.Deserialize(fs);
@@ -100,7 +103,6 @@ namespace EVERouteFinder.Classes
             }
         }
 
-        public XmlSerializer Serializer;
 
         public Object LoadFromStream(MemoryStream mems, string type)
         {
@@ -117,9 +119,9 @@ namespace EVERouteFinder.Classes
         {
             try
             {
-                if (CheckFile(path, FileMode.Open, FileAccess.Read))
+                if (CheckFile(path, FileMode.Open, FileAccess.Read, FileShare.Read))
                 {
-                    FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read);
+                    FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
                     int lenght = Convert.ToInt32(fs.Length);
                     MemoryStream mems = new MemoryStream(lenght);
                     BinaryReader br = new BinaryReader(fs);
@@ -147,7 +149,7 @@ namespace EVERouteFinder.Classes
         /* Checks that the file is available for the required file
          * access, retries 10 times waiting "retrysleeptime" miliseconds
          * for each try, and returns the availability when determined.*/
-        private bool CheckFile(string path, FileMode fm, FileAccess fa)
+        private bool CheckFile(string path, FileMode fm, FileAccess fa, FileShare fsh)
         {
             bool available = false;
             FileStream fs = null;
@@ -155,7 +157,7 @@ namespace EVERouteFinder.Classes
             {
                 try
                 {
-                    fs = new FileStream(path, fm);
+                    fs = new FileStream(path, fm, fa,fsh);
                     fs.Close();
                     available = true;
                     return available;
