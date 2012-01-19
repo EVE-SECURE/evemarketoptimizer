@@ -8,6 +8,7 @@ using System.Xml.Serialization;
 
 namespace EVERouteFinder.Classes
 {
+    [Serializable()]
     public class Node
     {
         //solarSystemName, x, y, z, solarSystemID, constellationID, regionID, security, id
