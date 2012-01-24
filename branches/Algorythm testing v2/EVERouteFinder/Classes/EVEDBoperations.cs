@@ -10,6 +10,7 @@ namespace EVERouteFinder.Classes
     class EVEDBoperations
     {
 
+
 #region privateVariables
 
         private SqlConnection myConnection;
