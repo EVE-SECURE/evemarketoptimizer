@@ -5,12 +5,12 @@ using System.Text;
 
 namespace EVERouteFinder.Classes
 {
-    class MarketOperations
+    internal class MarketOperations
     {
-        List<EVEOrder> sales;
-        List<EVEOrder> bids;
-        double cargohold;
-        double maxCap;
+        private List<EVEOrder> sales;
+        private List<EVEOrder> bids;
+        private double cargohold;
+        private double maxCap;
 
         private EVEOrder searchOrderByID(List<EVEOrder> orderList, int id)
         {

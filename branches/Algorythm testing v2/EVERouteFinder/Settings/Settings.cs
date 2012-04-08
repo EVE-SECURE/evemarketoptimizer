@@ -11,7 +11,9 @@ namespace EVERouteFinder.Settings
     public static class SEVEDBSettings
     {
         public static string DBConnectionString = string.Empty;
-        private static string SettingsPath = @"C:\Users\Greitone\Documents\visual studio 2010\Projects\EVERouteFinder\EVERouteFinder\Settings.xml";
+
+        private static string SettingsPath =
+            @"C:\Users\Greitone\Documents\visual studio 2010\Projects\EVERouteFinder\EVERouteFinder\Settings.xml";
 
         //public static void SettingsLoad()
         //{
@@ -24,12 +26,14 @@ namespace EVERouteFinder.Settings
         public static double factor = 7; // 9.5;
         public static double avgFactor = 7;
         private static double avgFactorsum = 7;
+
         public static void addAvg()
         {
             times++;
             avgFactorsum += factor;
-            avgFactor = avgFactorsum / times;
+            avgFactor = avgFactorsum/times;
         }
+
         private static int times = 1;
     }
 

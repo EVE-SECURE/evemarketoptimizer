@@ -7,25 +7,25 @@ using System.Threading;
 
 namespace EVERouteFinder.Classes
 {
-    class EVEDBoperations
+    internal class EVEDBoperations
     {
-
-
-#region privateVariables
+        #region privateVariables
 
         private SqlConnection myConnection;
         private SqlCommand myCommand;
         private SqlDataReader myReader;
-        
-#endregion
-        
-#region publicMethods
 
-        bool marketDB=false;
+        #endregion
+
+        #region publicMethods
+
+        private bool marketDB = false;
 
         public void startEVEDBConnection()
         {
-            SqlConnection myConnection = new SqlConnection("user id=greitone;password=leochase23; server=Greitone-PC;Trusted_Connection=yes;database=EVEDB; connection timeout=120");
+            SqlConnection myConnection =
+                new SqlConnection(
+                    "user id=greitone;password=leochase23; server=Greitone-PC;Trusted_Connection=yes;database=EVEDB; connection timeout=120");
             this.myConnection = myConnection;
         }
 
@@ -33,7 +33,9 @@ namespace EVERouteFinder.Classes
         {
             if (MarketDB)
             {
-                SqlConnection myConnection = new SqlConnection("user id=greitone;password=leochase23; server=Greitone-PC;Trusted_Connection=yes;database=EVEMarketDB; connection timeout=120");
+                SqlConnection myConnection =
+                    new SqlConnection(
+                        "user id=greitone;password=leochase23; server=Greitone-PC;Trusted_Connection=yes;database=EVEMarketDB; connection timeout=120");
                 this.myConnection = myConnection;
                 this.marketDB = MarketDB;
             }
@@ -104,14 +106,14 @@ namespace EVERouteFinder.Classes
             }
         }
 
-        public void eveDBQueryClose() 
+        public void eveDBQueryClose()
         {
             this.myReader.Close();
         }
 
-#endregion
+        #endregion
 
-#region publicProperties
+        #region publicProperties
 
         public SqlDataReader eveDBReader
         {
@@ -120,27 +122,31 @@ namespace EVERouteFinder.Classes
 
         public int eveDBReaderFieldCount
         {
-            get { return this.myReader.FieldCount;}
+            get { return this.myReader.FieldCount; }
         }
 
-#endregion
+        #endregion
 
-#region premadeQueries
+        #region premadeQueries
 
         public string premadeQuery_getDistanceBetweenSolarSystems(int fromSID, int toSID)
         {
-           return "declare @result float set @result = [dbo].[getDistanceBetweenSolarSystems](" + fromSID.ToString() + "," + toSID.ToString() + ") select @result";
+            return "declare @result float set @result = [dbo].[getDistanceBetweenSolarSystems](" + fromSID.ToString() +
+                   "," + toSID.ToString() + ") select @result";
         }
 
         public string premadeQuery_getAdjacentSolarSystems(int sID)
         {
-            return "select * from [dbo].[getJumpsInSystem]("+ sID.ToString() +")";
+            return "select * from [dbo].[getJumpsInSystem](" + sID.ToString() + ")";
         }
 
         public string premadeQuery_getSolarSystemNode(int sID)
         {
-            return "select solarSystemName, x, y, z, solarSystemID, constellationID, regionID, security from dbo.mapSolarSystems where solarSystemID = " + sID.ToString();
+            return
+                "select solarSystemName, x, y, z, solarSystemID, constellationID, regionID, security from dbo.mapSolarSystems where solarSystemID = " +
+                sID.ToString();
         }
+
         //public string Name { get; set; }
         //public int ID { get; set; }
         //public double X { get; set; }
@@ -158,12 +164,20 @@ namespace EVERouteFinder.Classes
 
         public string premadeQuery_getSolarSystemsList()
         {
-            return "select solarSystemID from mapSolarSystems WHERE regionID < 11000001 AND regionID != 10000004 AND regionID != 10000017 AND regionID != 10000019";
+            return
+                "select solarSystemID from mapSolarSystems WHERE regionID < 11000001 AND regionID != 10000004 AND regionID != 10000017 AND regionID != 10000019";
         }
 
         public string premadeQuery_insertToEveMarketData(EVEOrder order)
         {
-            string s = "insert into dbo.EVEMarketData values(" + order.OrderID.ToString() + ", " + order.RegionID.ToString() + ", " + order.SystemID.ToString() + ", " + order.StationID.ToString() + ", " + order.TypeID.ToString() + ", " + order.Bid.ToString() + ", " + order.Price.ToString(new System.Globalization.CultureInfo("en-US")) + ", " + order.MinVolume.ToString() + ", " + order.VolRemain.ToString() + ", " + order.VolEnter.ToString() + ", " + "'" + order.Issued.ToString("yyyy/MM/dd hh:mm:ss") + "'" + ", " + order.Duration.TotalDays.ToString().Replace(',', '.') + ", " + "'" + order.Reported.ToString("yyyy/MM/dd hh:mm:ss") + "'" + ");";
+            string s = "insert into dbo.EVEMarketData values(" + order.OrderID.ToString() + ", " +
+                       order.RegionID.ToString() + ", " + order.SystemID.ToString() + ", " + order.StationID.ToString() +
+                       ", " + order.TypeID.ToString() + ", " + order.Bid.ToString() + ", " +
+                       order.Price.ToString(new System.Globalization.CultureInfo("en-US")) + ", " +
+                       order.MinVolume.ToString() + ", " + order.VolRemain.ToString() + ", " + order.VolEnter.ToString() +
+                       ", " + "'" + order.Issued.ToString("yyyy/MM/dd hh:mm:ss") + "'" + ", " +
+                       order.Duration.TotalDays.ToString().Replace(',', '.') + ", " + "'" +
+                       order.Reported.ToString("yyyy/MM/dd hh:mm:ss") + "'" + ");";
             return s;
         }
 
@@ -175,17 +189,18 @@ namespace EVERouteFinder.Classes
 
         public string premadeQuery_UpdateEveOrder(EVEOrder order)
         {
-            string s = "update dbo.EVEMarketData set volremain = " + order.VolRemain.ToString() + ", reported = '" + order.Reported.ToString("yyyy/MM/dd hh:mm:ss") + "' where orderID = " + order.OrderID.ToString();
+            string s = "update dbo.EVEMarketData set volremain = " + order.VolRemain.ToString() + ", reported = '" +
+                       order.Reported.ToString("yyyy/MM/dd hh:mm:ss") + "' where orderID = " + order.OrderID.ToString();
             return s;
         }
 
         public string premadeQuery_getProfitableOrders(int top)
         {
-            string s = "SELECT top(" + top.ToString() + ") *  FROM [EVEMarketDB].[dbo].[ProfitTable]  order by totalProfit desc";
+            string s = "SELECT top(" + top.ToString() +
+                       ") *  FROM [EVEMarketDB].[dbo].[ProfitTable]  order by totalProfit desc";
             return s;
         }
 
-#endregion
-
+        #endregion
     }
 }

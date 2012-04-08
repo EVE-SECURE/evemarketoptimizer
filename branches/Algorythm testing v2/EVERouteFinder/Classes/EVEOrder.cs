@@ -5,38 +5,102 @@ using System.Text;
 
 namespace EVERouteFinder.Classes
 {
-    class EVEOrder
+    internal class EVEOrder
     {
+        private long orderID;
+        private int regionID;
+        private int systemID;
+        private int stationID;
+        private int typeID;
+        private int bid;
+        private double price;
+        private int minVolume;
+        private int volRemain;
+        private int volEnter;
+        private DateTime issued;
+        private TimeSpan duration;
+        private DateTime reported;
 
-        long orderID;
-        int regionID;
-        int systemID;
-        int stationID;
-        int typeID;
-        int bid;
-        double price;
-        int minVolume;
-        int volRemain;
-        int volEnter;
-        DateTime issued;
-        TimeSpan duration;
-        DateTime reported;
+        private bool isFileHeader = false;
 
-        bool isFileHeader = false;
+        public long OrderID
+        {
+            get { return this.orderID; }
+            set { this.orderID = value; }
+        }
 
-        public long OrderID { get { return this.orderID; } set { this.orderID = value; } }
-        public int RegionID { get { return this.regionID; } set { this.regionID = value; } }
-        public int SystemID { get { return this.systemID; } set { this.systemID = value; } }
-        public int StationID { get { return this.stationID; } set { this.stationID = value; } }
-        public int TypeID { get { return this.typeID; } set { this.typeID = value; } }
-        public int Bid { get { return this.bid; } set { this.bid = value; } } //bid = 0 means it's a sell order, bid=1 means it's a buying order
-        public double Price { get { return this.price; } set { this.price = value; } }
-        public int MinVolume { get { return this.minVolume; } set { this.minVolume = value; } }
-        public int VolRemain { get { return this.volRemain; } set { this.volRemain = value; } }
-        public int VolEnter { get { return this.volEnter; } set { this.volEnter = value; } }
-        public DateTime Issued { get { return this.issued; } set { this.issued = value; } }
-        public TimeSpan Duration { get { return this.duration; } set { this.duration = value; } }
-        public DateTime Reported { get { return this.reported; } set { this.reported = value; } }
+        public int RegionID
+        {
+            get { return this.regionID; }
+            set { this.regionID = value; }
+        }
+
+        public int SystemID
+        {
+            get { return this.systemID; }
+            set { this.systemID = value; }
+        }
+
+        public int StationID
+        {
+            get { return this.stationID; }
+            set { this.stationID = value; }
+        }
+
+        public int TypeID
+        {
+            get { return this.typeID; }
+            set { this.typeID = value; }
+        }
+
+        public int Bid
+        {
+            get { return this.bid; }
+            set { this.bid = value; }
+        }
+
+        //bid = 0 means it's a sell order, bid=1 means it's a buying order
+        public double Price
+        {
+            get { return this.price; }
+            set { this.price = value; }
+        }
+
+        public int MinVolume
+        {
+            get { return this.minVolume; }
+            set { this.minVolume = value; }
+        }
+
+        public int VolRemain
+        {
+            get { return this.volRemain; }
+            set { this.volRemain = value; }
+        }
+
+        public int VolEnter
+        {
+            get { return this.volEnter; }
+            set { this.volEnter = value; }
+        }
+
+        public DateTime Issued
+        {
+            get { return this.issued; }
+            set { this.issued = value; }
+        }
+
+        public TimeSpan Duration
+        {
+            get { return this.duration; }
+            set { this.duration = value; }
+        }
+
+        public DateTime Reported
+        {
+            get { return this.reported; }
+            set { this.reported = value; }
+        }
 
         public EVEOrder(string[] order)
         {
@@ -67,7 +131,8 @@ namespace EVERouteFinder.Classes
                     int.TryParse(order[12], out this.systemID) &&
                     int.TryParse(order[10], out this.stationID) &&
                     int.TryParse(order[2], out this.typeID) &&
-                    double.TryParse(order[0], System.Globalization.NumberStyles.AllowDecimalPoint, new System.Globalization.CultureInfo("en-US"), out this.price) &&
+                    double.TryParse(order[0], System.Globalization.NumberStyles.AllowDecimalPoint,
+                                    new System.Globalization.CultureInfo("en-US"), out this.price) &&
                     int.TryParse(order[6], out this.minVolume) &&
                     int.TryParse(order[1].Replace(".0", ""), out this.volRemain) &&
                     int.TryParse(order[5], out this.volEnter) &&
@@ -96,7 +161,6 @@ namespace EVERouteFinder.Classes
                         }
                     }
                 }
-
             }
             else if (order[6].Contains('.')) //then it's CSV
             {
@@ -106,7 +170,8 @@ namespace EVERouteFinder.Classes
                     int.TryParse(order[3], out this.stationID) &&
                     int.TryParse(order[4], out this.typeID) &&
                     int.TryParse(order[5], out this.bid) &&
-                    double.TryParse(order[6], System.Globalization.NumberStyles.AllowDecimalPoint, new System.Globalization.CultureInfo("en-US"), out this.price) &&
+                    double.TryParse(order[6], System.Globalization.NumberStyles.AllowDecimalPoint,
+                                    new System.Globalization.CultureInfo("en-US"), out this.price) &&
                     int.TryParse(order[7], out this.minVolume) &&
                     int.TryParse(order[8], out this.volRemain) &&
                     int.TryParse(order[9], out this.volEnter) &&
@@ -129,7 +194,8 @@ namespace EVERouteFinder.Classes
                     int.TryParse(order[2], out this.stationID) &&
                     int.TryParse(order[3], out this.typeID) &&
                     int.TryParse(order[4], out this.bid) &&
-                    double.TryParse(order[5], System.Globalization.NumberStyles.AllowDecimalPoint, new System.Globalization.CultureInfo("en-US"), out this.price) &&
+                    double.TryParse(order[5], System.Globalization.NumberStyles.AllowDecimalPoint,
+                                    new System.Globalization.CultureInfo("en-US"), out this.price) &&
                     int.TryParse(order[7], out this.minVolume) &&
                     int.TryParse(order[8], out this.volRemain) &&
                     int.TryParse(order[9], out this.volEnter) &&
@@ -147,7 +213,8 @@ namespace EVERouteFinder.Classes
             }
             if (!success)
             {
-                throw new ArgumentException("The provided string does not match the market dump data order nor the CSV data order!");
+                throw new ArgumentException(
+                    "The provided string does not match the market dump data order nor the CSV data order!");
             }
         }
 
@@ -166,7 +233,8 @@ namespace EVERouteFinder.Classes
                     int.TryParse(s[3], out stationID) &&
                     int.TryParse(s[4], out typeID) &&
                     int.TryParse(s[5], out bid) &&
-                    double.TryParse(s[6], System.Globalization.NumberStyles.AllowDecimalPoint, new System.Globalization.CultureInfo("en-US"), out this.price) &&
+                    double.TryParse(s[6], System.Globalization.NumberStyles.AllowDecimalPoint,
+                                    new System.Globalization.CultureInfo("en-US"), out this.price) &&
                     int.TryParse(s[7], out minVolume) &&
                     int.TryParse(s[8], out volRemain) &&
                     int.TryParse(s[9], out volEnter) &&
@@ -174,7 +242,8 @@ namespace EVERouteFinder.Classes
                     TimeSpan.TryParse(s[11] + ":00:00:00", out duration) &&
                     DateTime.TryParse(s[12], out reported))
                 {
-                    throw new ArgumentException("The provided string does not properly contain the required data to initialize the EveOrder");
+                    throw new ArgumentException(
+                        "The provided string does not properly contain the required data to initialize the EveOrder");
                 }
             }
         }
@@ -307,6 +376,5 @@ namespace EVERouteFinder.Classes
         //"range",
         //"reportedby",
         //"reportedtime"
-
     }
 }
