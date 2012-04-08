@@ -33,14 +33,13 @@ namespace EVERouteFinder
         private Thread[] ThreadPool;
 
 
-
         private void loopNodes()
         {
             Thread[] threadpool = new Thread[Environment.ProcessorCount];
             //Thread[] threadpool = new Thread[1];
             for (int i = 0; i < threadpool.Count(); i++)
             {
-                threadpool[i] = new Thread( () => Loop(i));
+                threadpool[i] = new Thread(() => Loop(i));
                 threadpool[i].Start();
                 Thread.Sleep(300);
             }
@@ -53,28 +52,26 @@ namespace EVERouteFinder
             XmlOperations xo = new XmlOperations();
             MemoryStream ms;
             ms = xo.GetStreamFromFile(Path.Combine(Directory.GetCurrentDirectory(), "nodeList.xml"));
-            nodelist = (List<Node>)xo.LoadFromStream(ms, nodelist.GetType().ToString());
+            nodelist = (List<Node>) xo.LoadFromStream(ms, nodelist.GetType().ToString());
             int amount = nodelist.Count;
-            while (!(amount % Environment.ProcessorCount == 0))
+            while (!(amount%Environment.ProcessorCount == 0))
             {
                 amount++;
             }
-            int segment = amount / Environment.ProcessorCount;
+            int segment = amount/Environment.ProcessorCount;
             if (i == Environment.ProcessorCount - 1)
             {
-                segment = segment - (segment * Environment.ProcessorCount - nodelist.Count);
+                segment = segment - (segment*Environment.ProcessorCount - nodelist.Count);
             }
-            for (int j = i * segment; j < (i+1) * segment; j++)
+            for (int j = i*segment; j < (i + 1)*segment; j++)
             {
                 foreach (Node n in nodelist)
                 {
                     loop(nodelist[j], n, ms, xo);
                 }
-
             }
-
-
         }
+
         //private void loopNodes()
         //{
         //    List<Node> myList = getSolarSystems();
@@ -104,7 +101,7 @@ namespace EVERouteFinder
                 pop.goal.nofactor = false;
                 List<Node> route = new List<Node>();
                 List<Node> nodelist = new List<Node>();
-                nodelist = (List<Node>)xo.LoadFromStream(ms, nodelist.GetType().ToString());
+                nodelist = (List<Node>) xo.LoadFromStream(ms, nodelist.GetType().ToString());
 
                 pop.completeNodeList = nodelist;
 
@@ -161,7 +158,7 @@ namespace EVERouteFinder
             if (this.textBox2.InvokeRequired)
             {
                 SetTextCallback d = new SetTextCallback(SetText);
-                this.Invoke(d, new object[] { text, thread });
+                this.Invoke(d, new object[] {text, thread});
             }
             else
             {
@@ -183,7 +180,7 @@ namespace EVERouteFinder
                         //    Settings.SEVEDBSettings.addAvg();
                         //    this.textBox1.AppendText(Settings.SEVEDBSettings.factor.ToString() + "// Avg:" + Settings.SEVEDBSettings.avgFactor.ToString() + "\r\n");
                         //}
-                        
+
                         break;
                     case 1:
                         this.textBox2.AppendText(text);
@@ -198,29 +195,32 @@ namespace EVERouteFinder
                         double errRate;
                         errors++;
                         this.textBoxCentre2.Text = (errors).ToString();
-                        Settings.SEVEDBSettings.factor -= a*Settings.SEVEDBSettings.factor / 10000;
+                        Settings.SEVEDBSettings.factor -= a*Settings.SEVEDBSettings.factor/10000;
                         Settings.SEVEDBSettings.addAvg();
-                        errRate = errors / ((double)(Convert.ToInt32(this.textBoxLeft.Text) + Convert.ToInt32(this.textBoxCentre.Text)));
+                        errRate = errors/
+                                  ((double)
+                                   (Convert.ToInt32(this.textBoxLeft.Text) + Convert.ToInt32(this.textBoxCentre.Text)));
                         this.errorrate = errRate;
                         this.textBoxRight2.Text = errRate.ToString();
                         break;
                 }
             }
         }
-        int errors = 0;
-        double errorrate = 0;
+
+        private int errors = 0;
+        private double errorrate = 0;
         //private List<Node> getList(int thread)
         //{
-            
+
         //}
 
-        delegate void StartLoop(Node n, Node n1);
+        private delegate void StartLoop(Node n, Node n1);
 
-        delegate void SetTextCallback(string text, int thread);
+        private delegate void SetTextCallback(string text, int thread);
 
-        delegate void StartDoingWork();
+        private delegate void StartDoingWork();
 
-        delegate void StartDoingWorkInt(int i);
+        private delegate void StartDoingWorkInt(int i);
 
         private void searchFactor()
         {
@@ -240,27 +240,27 @@ namespace EVERouteFinder
         private void loopMarketDatabase()
         {
             DirectoryInfo di = new DirectoryInfo(@"C:\Users\Greitone\EVEMarketDumps");
-            foreach(FileInfo fi in di.GetFiles())
+            foreach (FileInfo fi in di.GetFiles())
             {
                 IEnumerable<string> stringList = File.ReadLines(fi.FullName);
                 ParallelOptions po = new ParallelOptions();
                 po.MaxDegreeOfParallelism = Environment.ProcessorCount;
                 Parallel.ForEach(stringList, po, n =>
-                {
-                    string[] s = formatOrderString(n);
-                    EVEOrder o = new EVEOrder(s);
-                    o.InsertToDB();
-                }
-            );
+                                                     {
+                                                         string[] s = formatOrderString(n);
+                                                         EVEOrder o = new EVEOrder(s);
+                                                         o.InsertToDB();
+                                                     }
+                    );
             }
         }
 
         private string[] formatOrderString(string n)
         {
-            string[] s = n.Split(new string[] { "\",\"", "\t"}, StringSplitOptions.RemoveEmptyEntries);
-            if(s[0].Contains(','))
+            string[] s = n.Split(new string[] {"\",\"", "\t"}, StringSplitOptions.RemoveEmptyEntries);
+            if (s[0].Contains(','))
             {
-                s = n.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
+                s = n.Split(new string[] {","}, StringSplitOptions.RemoveEmptyEntries);
             }
             if (s[0].Contains('\"'))
             {
@@ -320,7 +320,5 @@ namespace EVERouteFinder
         {
             this.textBoxRight.Text = textBox1.Lines.Count().ToString();
         }
-
-
     }
 }

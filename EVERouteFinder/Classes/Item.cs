@@ -5,23 +5,23 @@ using System.Text;
 
 namespace EVERouteFinder.Classes
 {
-    class EveType
+    internal class EveType
     {
-        int typeID;
-        int groupID;
-        string typeName;
-        string description;
-        int graphicID;
-        double radius;
-        double mass;
-        double volume;
-        double capacity;
-        int portionSize;
-        int raceID;
-        float basePrice;
-        bool published;
-        int marketGroupID;
-        double chanceOfDuplicating;
-        int iconID;
+        private int typeID;
+        private int groupID;
+        private string typeName;
+        private string description;
+        private int graphicID;
+        private double radius;
+        private double mass;
+        private double volume;
+        private double capacity;
+        private int portionSize;
+        private int raceID;
+        private float basePrice;
+        private bool published;
+        private int marketGroupID;
+        private double chanceOfDuplicating;
+        private int iconID;
     }
 }

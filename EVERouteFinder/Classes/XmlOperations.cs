@@ -11,9 +11,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 
 namespace EVERouteFinder.Classes
 {
-
-
-    class XmlOperations
+    internal class XmlOperations
     {
         private int retrysleeptime;
         public XmlSerializer Serializer;
@@ -36,6 +34,7 @@ namespace EVERouteFinder.Classes
 
         /* Converts and saves an object to an xml file,
          * and locks the file during the process.*/
+
         public bool Save(Object objectToSerialize, string path, string type)
         {
             FileStream fs = null;
@@ -59,25 +58,30 @@ namespace EVERouteFinder.Classes
             }
             catch (IOException ex1)
             {
-                throw new IOException("IO Exception thrown at XmlOperations.Save, possibly due to the path to file being wrong. Exception message: " + ex1.Message);
+                throw new IOException(
+                    "IO Exception thrown at XmlOperations.Save, possibly due to the path to file being wrong. Exception message: " +
+                    ex1.Message);
             }
             catch (Exception ex2)
             {
                 fs.Close();
-                throw new Exception("Exception thrown at XmlOperations.Save, possibly due to a serialization issue, check the inputted data! Exception message: " + ex2.Message);
+                throw new Exception(
+                    "Exception thrown at XmlOperations.Save, possibly due to a serialization issue, check the inputted data! Exception message: " +
+                    ex2.Message);
             }
         }
 
         /* Loads and returns an object from an xml file
          * and locks the file the file for reading during
          * the process.*/
+
         public Object Load(string path, string type)
         {
             FileStream fs = null;
             if (this.Serializer == null)
             {
                 this.Serializer = new XmlSerializer(Type.GetType(type));
-            } 
+            }
             try
             {
                 if (CheckFile(path, FileMode.Open, FileAccess.Read, FileShare.Read))
@@ -94,12 +98,16 @@ namespace EVERouteFinder.Classes
             }
             catch (IOException ex1)
             {
-                throw new IOException("IO Exception thrown at XmlOperations.Load, possibly due to the path to file being wrong or the file being locked. Exception message: " + ex1.Message);
+                throw new IOException(
+                    "IO Exception thrown at XmlOperations.Load, possibly due to the path to file being wrong or the file being locked. Exception message: " +
+                    ex1.Message);
             }
             catch (Exception ex2)
             {
                 fs.Close();
-                throw new Exception("Exception thrown at XmlOperations.Load, possibly due to a deserialization issue, check the Xml File. Exception message: " + ex2.Message);
+                throw new Exception(
+                    "Exception thrown at XmlOperations.Load, possibly due to a deserialization issue, check the Xml File. Exception message: " +
+                    ex2.Message);
             }
         }
 
@@ -137,18 +145,22 @@ namespace EVERouteFinder.Classes
             }
             catch (IOException ex1)
             {
-                throw new IOException("IO Exception thrown at XmlOperations.Load, possibly due to the path to file being wrong or the file being locked. Exception message: " + ex1.Message);
+                throw new IOException(
+                    "IO Exception thrown at XmlOperations.Load, possibly due to the path to file being wrong or the file being locked. Exception message: " +
+                    ex1.Message);
             }
             catch (Exception ex2)
             {
-                throw new Exception("Exception thrown at XmlOperations.Load, possibly due to a deserialization issue, check the Xml File. Exception message: " + ex2.Message);
+                throw new Exception(
+                    "Exception thrown at XmlOperations.Load, possibly due to a deserialization issue, check the Xml File. Exception message: " +
+                    ex2.Message);
             }
-
         }
 
         /* Checks that the file is available for the required file
          * access, retries 10 times waiting "retrysleeptime" miliseconds
          * for each try, and returns the availability when determined.*/
+
         private bool CheckFile(string path, FileMode fm, FileAccess fa, FileShare fsh)
         {
             bool available = false;
@@ -157,7 +169,7 @@ namespace EVERouteFinder.Classes
             {
                 try
                 {
-                    fs = new FileStream(path, fm, fa,fsh);
+                    fs = new FileStream(path, fm, fa, fsh);
                     fs.Close();
                     available = true;
                     return available;
