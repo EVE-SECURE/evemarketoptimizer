@@ -5,13 +5,13 @@ using System.Windows.Forms;
 
 namespace EVERouteFinder
 {
-    static class Program
+    internal static class Program
     {
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
         [MTAThread]
-        static void Main()
+        private static void Main()
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
@@ -64,13 +64,7 @@ namespace EVERouteFinder
     //        Console.ReadKey();
 
     //    }
-
-
 }
-
-
-
-
 
 //Code samples
 
@@ -82,8 +76,6 @@ namespace EVERouteFinder
 //programSettings = null;
 //programSettings = (EVEDBSettings)xmlSettingsSerializer.Load(@"C:\Users\Greitone\Documents\visual studio 2010\Projects\EVERouteFinder\EVERouteFinder\Settings.xml", "EVERouteFinder.Settings.EVEDBSettings");
 //Console.WriteLine(programSettings.DBConnectionString);
-
-
 
 
 //for (int i = 0; i < fromSID.Count; i++)

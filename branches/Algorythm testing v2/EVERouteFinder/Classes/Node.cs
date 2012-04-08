@@ -1,69 +1,82 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Xml;
 using System.Xml.Serialization;
+using EVERouteFinder.Settings;
 
 namespace EVERouteFinder.Classes
 {
-    [Serializable()]
+    [Serializable]
     public class Node
     {
         //solarSystemName, x, y, z, solarSystemID, constellationID, regionID, security, id
+        private double if_score;
+        [XmlArray] public List<Node> neighborNodes;
+        public bool nofactor;
+        public bool notnull;
+
         public Node()
         {
         }
 
         public Node(Node n, bool isNeighbor)
         {
-            this.ID = n.ID;
-            this.Name = n.Name;
-            this.X = n.X;
-            this.Y = n.Y;
-            this.Z = n.Z;
-            this.System = n.System;
-            this.Constellation = n.Constellation;
-            this.Region = n.Region;
-            this.Security = n.Security;
-            this.g_score = n.g_score;
+            ID = n.ID;
+            Name = n.Name;
+            X = n.X;
+            Y = n.Y;
+            Z = n.Z;
+            System = n.System;
+            Constellation = n.Constellation;
+            Region = n.Region;
+            Security = n.Security;
+            g_score = n.g_score;
             //if (!isNeighbor)
             //{
             //    fillNeighborList(n);
             //}
         }
-        
-        [XmlAttribute()]
+
+        [XmlAttribute]
         public string Name { get; set; }
-        [XmlAttribute()]
+
+        [XmlAttribute]
         public int ID { get; set; }
-        [XmlElement()]
+
+        [XmlElement]
         public double X { get; set; }
-        [XmlElement()]
+
+        [XmlElement]
         public double Y { get; set; }
-        [XmlElement()]
+
+        [XmlElement]
         public double Z { get; set; }
-        [XmlElement()]
+
+        [XmlElement]
         public int System { get; set; }
-        [XmlElement()]
+
+        [XmlElement]
         public int Constellation { get; set; }
-        [XmlElement()]
+
+        [XmlElement]
         public int Region { get; set; }
-        [XmlElement()]
+
+        [XmlElement]
         public double Security { get; set; }
-        [XmlElement()]
+
+        [XmlElement]
         public double g_score { get; set; }
+
         //public double ih_score;
         //public double h_score { get { return h_scoreF(); } set { this.ih_score = value; } }
-        private double if_score;
-        public double f_score { get { return this.f_scoreF(); } set { if_score = value;} }
+
+        public double f_score
+        {
+            get { return f_scoreF(); }
+            set { if_score = value; }
+        }
+
         public Node camefrom { get; set; }
         public Node goal { get; set; }
-        public bool notnull = false;
-        public bool nofactor;
-        [XmlArray()]
-        public List<Node> neighborNodes = null;
 
         //private void fillNeighborList(Node n)
         //{
@@ -92,11 +105,12 @@ namespace EVERouteFinder.Classes
             //1.0637 E+15 / 324.09 = Max distance between nodes
             double minDist;
             double maxDist;
-            minDist= double.Parse("1063700000000000");
-            maxDist = minDist * 324.09;
+            minDist = double.Parse("1063700000000000");
+            maxDist = minDist*324.09;
             double distance;
-            distance = Math.Sqrt(Math.Pow(node.X - goal.X, 2) + Math.Pow(node.Y - goal.Y, 2) + Math.Pow(node.Z - goal.Z, 2));
-            return Settings.SEVEDBSettings.factor * distance / maxDist; 
+            distance =
+                Math.Sqrt(Math.Pow(node.X - goal.X, 2) + Math.Pow(node.Y - goal.Y, 2) + Math.Pow(node.Z - goal.Z, 2));
+            return SEVEDBSettings.factor*distance/maxDist;
             //last stable factor found at 7 (more than 95% accuracy) 
             //but factors of up to 15-17 are quite accurate (maybe around 85-90% accuracy
             //and only miss by 1-2 jumps) but quite faster. If calculation times for the whole
@@ -118,11 +132,11 @@ namespace EVERouteFinder.Classes
             //return 1 * distance / maxDist;
             return 0;
         }
-        
+
         private double f_scoreF()
         {
-            this.if_score = g_score + h_scoreF();
-            return this.if_score;
+            if_score = g_score + h_scoreF();
+            return if_score;
         }
 
 
@@ -131,15 +145,13 @@ namespace EVERouteFinder.Classes
             double result = 0;
             //if (goal != null && this.nofactor == false)
             //{
-                result = hFunction(this, goal);
+            result = hFunction(this, goal);
             //}
             //else if (goal != null && this.nofactor == true)
             //{
             //    result = hFunctionNoFactor(this, goal);
             //}
-                return result;
+            return result;
         }
-
     }
-
 }

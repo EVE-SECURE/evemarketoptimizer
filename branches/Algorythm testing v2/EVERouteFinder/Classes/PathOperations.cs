@@ -13,7 +13,7 @@ namespace EVERouteFinder.Classes
         {
             this.start = start;
             this.goal = goal;
-            this.avoidanceList= new List<Node>();
+            this.avoidanceList = new List<Node>();
             this.closedset = new List<Node>();
             this.openset = new List<Node>();
         }
@@ -39,8 +39,8 @@ namespace EVERouteFinder.Classes
         public Node start { get; set; }
         public Node goal { get; set; }
         public List<Node> avoidanceList { get; set; }
-        List<Node> closedset;
-        List<Node> openset;
+        private List<Node> closedset;
+        private List<Node> openset;
         public List<Node> completeNodeList;
         public bool nofactor;
         //private DateTime timestamp;
@@ -81,7 +81,8 @@ namespace EVERouteFinder.Classes
                         //{
                         y.goal = this.goal;
                         y.nofactor = this.nofactor;
-                        double tentative_g_score = x.g_score + 1; //el 1 se sustituiria por dist(x,y) aplicable segun el caso
+                        double tentative_g_score = x.g_score + 1;
+                            //el 1 se sustituiria por dist(x,y) aplicable segun el caso
                         bool tentative_is_better = false;
 
                         if (this.searchbyID(this.closedset, y.ID) != null)
@@ -120,12 +121,9 @@ namespace EVERouteFinder.Classes
         private Node searchbyID(List<Node> nodeList, int id)
         {
             return nodeList.Find
-            (
-            delegate(Node n)
-            {
-                return n.ID == id;
-            }
-            );
+                (
+                    delegate(Node n) { return n.ID == id; }
+                );
 //          return nodeList.Find(delegate(Node n){return n.ID == id;});
         }
 
@@ -140,17 +138,18 @@ namespace EVERouteFinder.Classes
                 }
             }
         }
+
         //double heuristicFunction(Node from, Node to)
         //{
         //    double a = 0;
         //    return a;
         //}
 
-        Node getLowestFscoreNode(List<Node> nodelist)
+        private Node getLowestFscoreNode(List<Node> nodelist)
         {
             int lowestindex = 0;
             double lowestFscore = double.MaxValue;
-            for(int i = 0; i < nodelist.Count; i++)
+            for (int i = 0; i < nodelist.Count; i++)
             {
                 if (nodelist[i].f_score < lowestFscore)
                 {
@@ -161,7 +160,7 @@ namespace EVERouteFinder.Classes
             return nodelist[lowestindex];
         }
 
-        List<Node> ReconstructPath(Node cameFrom, Node currentNode)
+        private List<Node> ReconstructPath(Node cameFrom, Node currentNode)
         {
             //TimeSpan t = timestamp.Subtract(DateTime.Now);
             List<Node> Path = new List<Node>();
@@ -192,7 +191,7 @@ namespace EVERouteFinder.Classes
 
     //public delegate void nodeInOpenSet(object sender, nodeInOpenSetEventArgs e);
     //public delegate void nodeInClosedSet(object sender, nodeInClosedSetEventArgs e);
-    
+
     //public class nodeInOpenSetEventArgs : EventArgs
     //{
     //    public nodeInOpenSetEventArgs(Node node, bool isadded)
@@ -218,5 +217,4 @@ namespace EVERouteFinder.Classes
     //    public bool isAdded { get; set; }
     //    public DateTime eventTime { get; set; }
     //}
-
 }
